@@ -1,12 +1,10 @@
-
-version: '3.8'
 services:
   db:
     image: mysql:8.0
     container_name: ensto_mysql
     restart: unless-stopped
     env_file:
-      - .env.mysql
+      - .env
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -22,7 +20,7 @@ services:
     container_name: ensto_phpmyadmin
     restart: unless-stopped
     env_file:
-      - .env.mysql
+      - .env
     environment:
       PMA_HOST: db
       PMA_USER: ${PMA_USER}
