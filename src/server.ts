@@ -1,20 +1,29 @@
 import app from './app';
-import sequelize from './config/db';
 
-// Crucial: Import the models index so relationships are established BEFORE syncing
-import './models';
+import {EnstoDatabase, sequelize} from "@les-desesperes/ensto-db";
 
 const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
+    const db = new EnstoDatabase({
+        connection: {
+            database: process.env.MYSQL_DATABASE,
+            username: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            host: process.env.MYSQL_HOST,
+            port: Number(process.env.MYSQL_PORT) || 3306,
+            logging: false,
+            dialect: 'mysql',
+        },
+    });
+
     try {
-        // 1. Test the database connection
-        await sequelize.authenticate();
+
+        await db.authenticate();
         console.log('✅ Connected to MySQL database.');
 
-        // 2. Synchronize models with the database
-        // alter: true will safely update existing tables to match your models without dropping them
-        await sequelize.sync({ alter: true });
+        await db.sync({ alter: true });
+        db.initDefaultModels()
         console.log('✅ All database tables synchronized.');
 
         // 3. Start the Express server
@@ -22,6 +31,7 @@ const startServer = async () => {
             console.log(`🚀 Server is running in ${process.env.NODE_ENV} mode on http://localhost:${PORT}`);
         });
     } catch (error) {
+        await db.close();
         console.error('❌ Failed to start the server or sync database:', error);
         process.exit(1);
     }

@@ -1,12 +1,15 @@
-import { Router, Request, Response } from 'express';
-import vehicleRoute from "@/routes/vehicleRoute";
+import { Router } from 'express';
+import vehicleRoutes from './vehicleRoutes';
+import driverRoutes from './driverRoutes';
 
 const router = Router();
 
-router.get('/', (req: Request, res: Response) => {
+router.get('/', (req, res) => {
     res.json({ message: 'Welcome to the API' });
 });
 
-router.use('/vehicle', vehicleRoute)
+// Mount the routes
+router.use('/vehicle', vehicleRoutes);
+router.use('/driver', driverRoutes);
 
 export default router;

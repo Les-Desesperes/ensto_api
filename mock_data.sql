@@ -23,11 +23,11 @@ ALTER TABLE `delivery_drivers` AUTO_INCREMENT = 1;
 
 INSERT INTO `delivery_drivers` (`driver_id`, `encrypted_last_name`, `encrypted_first_name`, `company`,
                                 `ppe_charter_valid`, `ppe_signature_date`)
-VALUES (1, 'e3b0c44298fc1c149afbf4c8996fb924:e3b0c44298fc1c14', 'e3b0c44298fc1c149afbf4c8996fb924:8a2f3b',
+VALUES (1, '8cbba7846532d3c9c69ad50a3b741f6b:741c7562a344681890a1c4d002d485f1', '8055ea4e8d6c8b4ecc3c51bcca34e91c:e306f69ae41f788f282d45f639566ca0',
         'Fast Logistics', 1, '2023-10-01 08:30:00'),
-       (2, 'a1b2c3d4e5f678901234567890abcdef:c4d5e6f7a8b9', 'a1b2c3d4e5f678901234567890abcdef:1a2b3c', 'Global Freight',
+       (2, 'baf4fb538356b8aa4e4e5519e7f14faf:66037dbdb4867e842c49e685a3f22ddf', 'c30686cc406c2529371406777594ebf8:850006fd03d1f3fdcfc1d08a058d7d65', 'Global Freight',
         1, '2023-11-15 09:00:00'),
-       (3, 'f1e2d3c4b5a69876543210fedcba0987:9f8e7d', 'f1e2d3c4b5a69876543210fedcba0987:6c5b4a', 'Local Transports', 0,
+       (3, '82e3c7a7acc1a0f94c9adadb52ae06fb:400e014b579d606012a5491d1f959689', '1506a6915f7437ddbabb76e566687af7:5d0fe549a2151d84a3d9f11141c6faae', 'Local Transports', 0,
         NULL);
 
 -- --------------------------------------------------------

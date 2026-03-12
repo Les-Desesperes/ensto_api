@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { Vehicle, DeliveryDriver } from '../models'; // Importing from the models index to include associations
+import {DeliveryDriver, sequelize, Vehicle} from "@les-desesperes/ensto-db";
 
 export const getVehicleByPlate = async (req: Request, res: Response): Promise<void> => {
     try {
+        await sequelize.authenticate();
         const { licensePlate } = req.params;
 
-        // Find the vehicle and optionally include the associated driver
         const vehicle = await Vehicle.findOne({
             where: { licensePlate },
             include: [
@@ -28,8 +28,10 @@ export const getVehicleByPlate = async (req: Request, res: Response): Promise<vo
             success: true,
             data: vehicle,
         });
+        await sequelize.close();
     } catch (error) {
         console.error('Error fetching vehicle by plate:', error);
+        await sequelize.close();
         res.status(500).json({
             success: false,
             message: 'Internal Server Error',
