@@ -1,6 +1,6 @@
 import app from './app';
 
-import {EnstoDatabase, sequelize} from "@les-desesperes/ensto-db";
+import {EnstoDatabase} from "@les-desesperes/ensto-db";
 
 const PORT = process.env.PORT || 3000;
 
