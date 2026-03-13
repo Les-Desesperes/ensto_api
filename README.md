@@ -60,7 +60,7 @@ ensto_api/
 │   │   ├── driverController.ts # Driver CRUD logic
 │   │   └── vehicleController.ts# Vehicle lookup logic
 │   ├── routes/
-│   │   ├── index.ts            # Root router — mounts all sub-routers
+│   │   ├── router.ts            # Root router — mounts all sub-routers
 │   │   ├── driverRoutes.ts     # /api/v1/driver routes
 │   │   └── vehicleRoutes.ts    # /api/v1/vehicle routes
 │   ├── middlewares/            # (reserved for auth, validation, etc.)

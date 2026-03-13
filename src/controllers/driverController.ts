@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import {DeliveryDriver} from "@les-desesperes/ensto-db";
+import { DeliveryDriver } from "@les-desesperes/ensto-db";
+import {broadcastNotification} from "@/websockets";
 
 // GET: Fetch all delivery drivers
 export const getDrivers = async (req: Request, res: Response): Promise<void> => {
@@ -23,26 +24,32 @@ export const getDrivers = async (req: Request, res: Response): Promise<void> => 
 // POST: Create a new delivery driver
 export const createDriver = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { firstName, lastName, company, ppeCharterValid, ppeSignatureDate } = req.body;
+        // Changed 'company' to 'companyId' to match the v2 Database schema
+        const { firstName, lastName, companyId, ppeCharterValid, ppeSignatureDate } = req.body;
 
         // Basic validation
-        if (!firstName || !lastName || !company) {
+        if (!firstName || !lastName || !companyId) {
             res.status(400).json({
                 success: false,
-                message: 'firstName, lastName, and company are required fields.',
+                message: 'firstName, lastName, and companyId are required fields.',
             });
             return;
         }
 
         // Create the driver
         const newDriver = await DeliveryDriver.create({
-            // We pass the raw names to the encrypted fields.
-            // The Sequelize beforeSave hook will encrypt them before insertion.
             encryptedFirstName: firstName,
             encryptedLastName: lastName,
-            company,
+            company: companyId, // Foreign key linking to the Company table
             ppeCharterValid: ppeCharterValid || false,
             ppeSignatureDate: ppeSignatureDate || null,
+        });
+
+        // 🚀 Broadcast the event to all connected WebSocket clients (e.g., Next.js frontend)
+        broadcastNotification({
+            type: 'NEW_DRIVER',
+            message: `New driver ${firstName} ${lastName} has been added to the system.`,
+            payload: newDriver
         });
 
         res.status(201).json({
