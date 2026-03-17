@@ -1,7 +1,7 @@
 import { Employee } from '@les-desesperes/ensto-db';
 import { IService } from '@/shared/interfaces';
 
-export type EmployeeRole = 'Admin' | 'WarehouseWorker';
+export type EmployeeRole = 'Admin' | 'Magasinier' | 'Personnel';
 
 export interface CreateEmployeeInput {
     username: string;
@@ -40,10 +40,10 @@ export class EmployeeService implements IService {
             };
         }
 
-        if (role !== 'Admin' && role !== 'WarehouseWorker') {
+        if (role !== 'Admin' && role !== 'Magasinier' && role !== 'Personnel') {
             throw {
                 statusCode: 400,
-                message: 'role must be either Admin or WarehouseWorker.',
+                message: 'role must be one of: Admin, Magasinier, Personnel.',
             };
         }
 
