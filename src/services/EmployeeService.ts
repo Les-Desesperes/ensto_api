@@ -72,9 +72,14 @@ export class EmployeeService implements IService {
         }
 
         try {
-            return await Employee.findOne({
-                where: { badgeUuid: id },
-            });
+            const user = await Employee.findOne({ where: { badgeUuid: id } });
+
+            if(!user) return {
+                statusCode: 404,
+                message: 'User not found.',
+            };
+
+            return { status: 200, data: { id: user.employeeId, badgeUuid: user.badgeUuid } };
         } catch (error) {
             console.error('Error fetching employee by RFID:', error);
             throw {
