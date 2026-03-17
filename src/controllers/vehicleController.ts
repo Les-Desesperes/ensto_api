@@ -1,40 +1,72 @@
-import { Request, Response } from 'express';
-import {DeliveryDriver, sequelize, Vehicle} from "@les-desesperes/ensto-db";
+import { Request, Response, Router } from 'express';
+import { IController } from '@/shared/interfaces';
+import { VehicleService } from '@/services';
+import { asyncHandler, successResponse } from '@/shared/utils';
 
-export const getVehicleByPlate = async (req: Request, res: Response): Promise<void> => {
-    try {
-        await sequelize.authenticate();
-        const { licensePlate } = req.params;
+/**
+ * VehicleController
+ * Handles HTTP requests for vehicle operations.
+ * Uses Dependency Injection to receive the service instance via constructor.
+ * 
+ * SOLID Principles:
+ * - Single Responsibility: Only handles HTTP request/response for vehicle operations
+ * - Open/Closed: Open for extension (can add new methods), closed for modification
+ * - Dependency Inversion: Depends on injected VehicleService, not concrete implementations
+ * - Interface Segregation: Implements only IController interface
+ */
+export class VehicleController implements IController {
+    private vehicleService: VehicleService;
 
-        const vehicle = await Vehicle.findOne({
-            where: { licensePlate },
-            include: [
-                {
-                    model: DeliveryDriver,
-                    attributes: ['driverId', 'encryptedFirstName', 'encryptedLastName', 'company'],
-                },
-            ],
-        });
-
-        if (!vehicle) {
-            res.status(404).json({
-                success: false,
-                message: `Vehicle with license plate ${licensePlate} not found.`,
-            });
-            return;
-        }
-
-        res.status(200).json({
-            success: true,
-            data: vehicle,
-        });
-        await sequelize.close();
-    } catch (error) {
-        console.error('Error fetching vehicle by plate:', error);
-        await sequelize.close();
-        res.status(500).json({
-            success: false,
-            message: 'Internal Server Error',
-        });
+    /**
+     * Constructor with Dependency Injection
+     * @param vehicleService - The VehicleService instance
+     */
+    constructor(vehicleService: VehicleService) {
+        this.vehicleService = vehicleService;
+        // Bind methods to ensure 'this' context is preserved in Express routes
+        this.getVehicleByPlate = this.getVehicleByPlate.bind(this);
+        this.getAllVehicles = this.getAllVehicles.bind(this);
     }
-};
+
+    /**
+     * GET handler: Fetch vehicle by license plate
+     * Route: GET /api/v1/vehicle/plate/:licensePlate
+     * @param req - Express request object with licensePlate parameter
+     * @param res - Express response object
+     */
+    private async getVehicleByPlate(req: Request, res: Response): Promise<void> {
+        const licensePlate = req.params.licensePlate as string;
+        const vehicle = await this.vehicleService.getVehicleByPlate(licensePlate);
+        successResponse(res, 200, vehicle);
+    }
+
+    /**
+     * GET handler: Fetch all vehicles
+     * Route: GET /api/v1/vehicle/
+     * @param req - Express request object
+     * @param res - Express response object
+     */
+    private async getAllVehicles(req: Request, res: Response): Promise<void> {
+        const vehicles = await this.vehicleService.getAllVehicles();
+        successResponse(res, 200, vehicles);
+    }
+
+    /**
+     * Public method to get wrapped handlers
+     * Returns the handlers wrapped with asyncHandler to catch errors
+     */
+    public getHandlers() {
+        return {
+            getVehicleByPlate: asyncHandler(this.getVehicleByPlate),
+            getAllVehicles: asyncHandler(this.getAllVehicles),
+        };
+    }
+
+    /**
+     * IController interface implementation
+     * Returns a dummy router (actual routing is done in Route class)
+     */
+    getRouter(): Router {
+        return {} as Router;
+    }
+}

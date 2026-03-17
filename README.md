@@ -1,414 +1,343 @@
-# ensto_api
+# Ensto API - Refactored to OOP Architecture
 
-A RESTful API built with **Express** and **TypeScript** for managing warehouse logistics — delivery drivers, vehicles, employees, visitors, and history logs.  
-Data encryption (AES-256-CBC) is applied transparently on sensitive fields via Sequelize model hooks from the `@les-desesperes/ensto-db` shared library.
+A professional-grade **RESTful API** built with **Express**, **TypeScript**, and **SOLID principles**.  
+Manages warehouse logistics including delivery drivers, vehicles, and real-time notifications via WebSocket.  
+Data encryption (AES-256) handled transparently via Sequelize hooks from the `@les-desesperes/ensto-db` shared library.
+
+## 🎯 Architecture Style
+
+✨ **Complete Object-Oriented Programming (OOP) Refactoring** with:
+- ✅ Class-based controllers, services, and routes
+- ✅ Dependency Injection pattern
+- ✅ SOLID principles throughout
+- ✅ Global error handling
+- ✅ Async error catching
+- ✅ Type-safe interfaces
 
 ---
 
-## Table of Contents
+## 📚 Quick Links
 
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-  - [1. Clone the repository](#1-clone-the-repository)
-  - [2. Install dependencies](#2-install-dependencies)
-  - [3. Configure environment variables](#3-configure-environment-variables)
-  - [4. Start the database](#4-start-the-database)
-  - [5. Seed mock data](#5-seed-mock-data)
-  - [6. Start the API](#6-start-the-api)
-- [Environment Variables](#environment-variables)
-- [Scripts](#scripts)
-- [Database](#database)
-  - [Schema overview](#schema-overview)
-  - [Encryption](#encryption)
-  - [Seeding](#seeding)
-- [API Reference](#api-reference)
-  - [Health Check](#health-check)
-  - [Drivers](#drivers)
-  - [Vehicles](#vehicles)
-- [Security](#security)
-- [Development Notes](#development-notes)
+- 📖 [QUICK_START.md](./QUICK_START.md) - Getting started & Docker setup
+- 🏗️ [ARCHITECTURE.md](./ARCHITECTURE.md) - Deep dive into architecture & design patterns
+- 🔄 [REFACTORING_SUMMARY.md](./REFACTORING_SUMMARY.md) - Before/after comparison & migration guide
 
 ---
 
 ## Tech Stack
 
-| Layer       | Technology                          |
-|-------------|--------------------------------------|
-| Runtime     | Node.js (ES2022)                     |
-| Language    | TypeScript 5                         |
-| Framework   | Express 5                            |
-| ORM         | Sequelize 6                          |
-| Database    | MySQL 8.0 (Docker)                   |
-| DB Models   | `@les-desesperes/ensto-db`           |
-| Encryption  | AES-256-CBC (Node.js `crypto`)       |
-| Security    | Helmet, CORS                         |
-| Dev tooling | ts-node-dev, tsconfig-paths          |
-| Package mgr | pnpm                                 |
+| Layer         | Technology                          |
+|---------------|--------------------------------------|
+| **Runtime**   | Node.js 18+ (ES2022)                |
+| **Language**  | TypeScript 5.9                      |
+| **Framework** | Express 5.2                         |
+| **ORM**       | Sequelize 6.37                      |
+| **Database**  | MySQL 8.0 (Docker)                  |
+| **DB Models** | `@les-desesperes/ensto-db` v1.1.0   |
+| **Encryption** | AES-256-CBC + SHA-256 (crypto)      |
+| **Security**  | Helmet 8.1, CORS 2.8                |
+| **WebSocket** | ws 8.19                             |
+| **Dev Tools** | ts-node-dev 2.0, tsconfig-paths 4.2 |
+| **Package**   | pnpm 10.30                          |
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
-ensto_api/
-├── src/
-│   ├── app.ts                  # Express app setup (middlewares, routes)
-│   ├── server.ts               # DB connection bootstrap + HTTP server start
-│   ├── controllers/
-│   │   ├── driverController.ts # Driver CRUD logic
-│   │   └── vehicleController.ts# Vehicle lookup logic
-│   ├── routes/
-│   │   ├── router.ts            # Root router — mounts all sub-routers
-│   │   ├── driverRoutes.ts     # /api/v1/driver routes
-│   │   └── vehicleRoutes.ts    # /api/v1/vehicle routes
-│   ├── middlewares/            # (reserved for auth, validation, etc.)
-│   └── utils/
-│       └── crypto.ts           # AES-256-CBC encrypt/decrypt + SHA-256 hash
-├── mock_data.sql               # Dev seed data (valid pre-encrypted values)
-├── docker-compose.yml          # MySQL 8 + phpMyAdmin services
-├── .env                        # Local environment variables (not committed)
-├── tsconfig.json
-└── package.json
+src/
+├── app.ts                          # App class — Express configuration
+├── server.ts                       # Server class — lifecycle management
+├── controllers/                    # HTTP request handlers (classes)
+│   ├── DeliveryDriverController.ts # Handles /driver endpoints
+│   ├── VehicleController.ts        # Handles /vehicle endpoints
+│   └── index.ts
+├── services/                       # Business logic (classes)
+│   ├── DeliveryDriverService.ts    # Driver operations
+│   ├── VehicleService.ts           # Vehicle operations
+│   └── index.ts
+├── routes/                         # Route binding (classes)
+│   ├── DeliveryDriverRoute.ts      # Routes for /driver
+│   ├── VehicleRoute.ts             # Routes for /vehicle
+│   └── index.ts
+├── shared/                         # Shared layer
+│   ├── interfaces/                 # Contracts (IService, IController, IRoute)
+│   ├── middleware/                 # Express middleware
+│   ├── utils/                      # Helper functions
+│   └── index.ts
+├── types/                          # TypeScript definitions
+├── utils/                          # Application utilities
+└── websockets/                     # WebSocket integration
 ```
 
 ---
 
-## Prerequisites
+## 🚀 Quick Start
 
-- [Node.js](https://nodejs.org/) >= 18
-- [pnpm](https://pnpm.io/) >= 10
-- [Docker](https://www.docker.com/) + Docker Compose
+### Prerequisites
+- Node.js 18+
+- pnpm or npm
+- MySQL 8.0 (or Docker)
 
----
-
-## Getting Started
-
-### 1. Clone the repository
+### Installation
 
 ```bash
-git clone <repository-url>
+# Clone and install
 cd ensto_api
-```
-
-### 2. Install dependencies
-
-```bash
 pnpm install
-```
 
-### 3. Configure environment variables
-
-Copy the example below into a `.env` file at the project root:
-
-```env
-# Server
+# Create .env file
+cat > .env << EOF
 PORT=3000
 NODE_ENV=development
-
-# MySQL
-MYSQL_ROOT_PASSWORD=rootpassword
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
 MYSQL_DATABASE=ensto_db
 MYSQL_USER=ensto_user
 MYSQL_PASSWORD=ensto_pass
-MYSQL_HOST=127.0.0.1
-MYSQL_PORT=3306
+EOF
 
-# Encryption — MUST be exactly 32 characters
-ENCRYPTION_KEY=default-32-character-secret-key!
+# Start MySQL with Docker
+docker-compose up mysql phpmyadmin -d
 
-# phpMyAdmin
-PMA_USER=ensto_user
-PMA_PASSWORD=ensto_pass
-```
-
-> ⚠️ **Important:** `ENCRYPTION_KEY` must be exactly **32 characters** (AES-256 requirement).  
-> All environments (dev/staging/prod) sharing the same database **must use the same key**.  
-> Changing this key after data has been written will make all encrypted fields unreadable.
-
-### 4. Start the database
-
-```bash
-docker compose up -d
-```
-
-This starts:
-- **MySQL 8** on port `3306`
-- **phpMyAdmin** on [http://localhost:8080](http://localhost:8080)
-
-### 5. Seed mock data
-
-After the database is running and the API has synced the schema at least once (step 6), load the seed data:
-
-```bash
-docker exec -i ensto_mysql mysql -uroot -prootpassword ensto_db < mock_data.sql
-```
-
-> The seed file contains pre-encrypted driver names generated with `ENCRYPTION_KEY=default-32-character-secret-key!`. If you change the key, regenerate seeds via POST `/api/v1/driver`.
-
-### 6. Start the API
-
-```bash
+# Run development server
 pnpm dev
 ```
 
-The server will be available at [http://localhost:3000](http://localhost:3000).
+Access API at **http://localhost:3000**
+
+For detailed setup → See [QUICK_START.md](./QUICK_START.md)
 
 ---
 
-## Environment Variables
+## 🏗️ Architecture Overview
 
-| Variable              | Required | Default                            | Description                                      |
-|-----------------------|----------|------------------------------------|--------------------------------------------------|
-| `PORT`                | No       | `3000`                             | HTTP port the API listens on                     |
-| `NODE_ENV`            | No       | `development`                      | Runtime environment                              |
-| `MYSQL_DATABASE`      | Yes      | —                                  | MySQL database name                              |
-| `MYSQL_USER`          | Yes      | —                                  | MySQL user                                       |
-| `MYSQL_PASSWORD`      | Yes      | —                                  | MySQL user password                              |
-| `MYSQL_ROOT_PASSWORD` | Yes      | —                                  | MySQL root password (used by Docker)             |
-| `MYSQL_HOST`          | Yes      | —                                  | MySQL host (`127.0.0.1` for local Docker)        |
-| `MYSQL_PORT`          | No       | `3306`                             | MySQL port                                       |
-| `ENCRYPTION_KEY`      | Yes      | `default-32-character-secret-key!` | AES-256 key — **must be 32 chars**, change in prod |
-| `PMA_USER`            | No       | —                                  | phpMyAdmin login user                            |
-| `PMA_PASSWORD`        | No       | —                                  | phpMyAdmin login password                        |
+### Layered Architecture
 
----
-
-## Scripts
-
-| Command        | Description                                              |
-|----------------|----------------------------------------------------------|
-| `pnpm dev`     | Start in development mode with hot-reload (ts-node-dev)  |
-| `pnpm build`   | Compile TypeScript to `dist/`                            |
-| `pnpm start`   | Run compiled production build from `dist/`               |
-
----
-
-## Database
-
-### Schema overview
-
-The database is managed by the `@les-desesperes/ensto-db` package and synced automatically on startup via `db.sync({ alter: true })`.
-
-| Table               | Description                                                      |
-|---------------------|------------------------------------------------------------------|
-| `employees`         | Warehouse staff — username, SHA-256 hashed password, role        |
-| `delivery_drivers`  | External drivers — AES-256 encrypted first/last name, company    |
-| `vehicles`          | Fleet — license plate, type, linked driver (FK)                  |
-| `visitors`          | Site visitors — full name, company, arrival time                 |
-| `history_logs`      | Audit log — entry/exit/refusal events linked to entities         |
-
-### Encryption
-
-Driver names (`encrypted_first_name`, `encrypted_last_name`) are encrypted using **AES-256-CBC** before being written to the database.
-
-- **Algorithm:** `aes-256-cbc`
-- **Key:** `ENCRYPTION_KEY` env variable (must be 32 bytes)
-- **IV:** randomly generated per record, stored as a prefix: `<iv_hex>:<ciphertext_hex>`
-- **Hooks:** encryption runs in the Sequelize `beforeSave` hook; decryption runs in `afterFind` — fully transparent to controllers.
-
-Employee passwords are hashed with **SHA-256** (one-way, no decryption).
-
-### Seeding
-
-The `mock_data.sql` file contains:
-- 3 employees (1 Admin, 2 WarehouseWorkers)
-- 3 delivery drivers (with valid pre-encrypted names)
-- 4 vehicles
-- 3 visitors
-- 5 history log entries
-
-```bash
-docker exec -i ensto_mysql mysql -uroot -prootpassword ensto_db < mock_data.sql
+```
+HTTP Request
+    ↓
+Express Middleware (helmet, cors, logging, errors)
+    ↓
+Routes Layer (DeliveryDriverRoute, VehicleRoute)
+    ↓
+Controllers (DeliveryDriverController, VehicleController)
+    ↓
+Services (DeliveryDriverService, VehicleService)
+    ↓
+Database (Sequelize Models with encryption hooks)
+    ↓
+MySQL (ensto_db)
 ```
 
----
+### Class Diagram
 
-## API Reference
+```typescript
+// Service - Contains business logic
+class DeliveryDriverService {
+    async getAllDrivers(): Promise<any[]>
+    async createDriver(...): Promise<any>
+}
 
-Base URL: `http://localhost:3000`
+// Controller - Depends on Service (Dependency Injection)
+class DeliveryDriverController {
+    constructor(private service: DeliveryDriverService)
+    private async getAllDrivers(req, res): Promise<void>
+    public getHandlers()
+}
 
-All endpoints return JSON. Successful responses include `"success": true`. Error responses include `"success": false` and a `"message"` field.
-
----
-
-### Health Check
-
-#### `GET /health`
-
-Returns the server status.
-
-**Response `200`**
-```json
-{
-  "status": "OK",
-  "message": "Server is running"
+// Route - Creates Service & Controller, binds endpoints
+class DeliveryDriverRoute {
+    constructor() {
+        const service = new DeliveryDriverService();
+        const controller = new DeliveryDriverController(service);
+        this.router.get('/', controller.getHandlers().getAllDrivers);
+    }
+    public getRouter(): Router
 }
 ```
 
+### SOLID Principles
+
+| Principle | Implementation |
+|-----------|---|
+| **S**ingle Responsibility | Each class has one reason to change |
+| **O**pen/Closed | Open for extension, closed for modification |
+| **L**iskov Substitution | Services/Controllers are interchangeable |
+| **I**nterface Segregation | Minimal interfaces (IService, IController, IRoute) |
+| **D**ependency Inversion | Depends on abstractions, not concrete implementations |
+
 ---
+
+## 🔌 API Endpoints
 
 ### Drivers
 
-#### `GET /api/v1/driver/`
+| Method | Endpoint | Handler | Response |
+|--------|----------|---------|----------|
+| GET | `/api/v1/driver/` | getAllDrivers | `{ success: true, data: [...] }` |
+| POST | `/api/v1/driver/` | createDriver | `{ success: true, data: {...}, message: "..." }` |
 
-Returns a list of all delivery drivers. Names are automatically decrypted before being returned.
-
-**Response `200`**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "driverId": 1,
-      "encryptedFirstName": "John",
-      "encryptedLastName": "Doe",
-      "company": "Fast Logistics",
-      "ppeCharterValid": true,
-      "ppeSignatureDate": "2023-10-01T08:30:00.000Z"
-    }
-  ]
-}
+**Example - Get Drivers**:
+```bash
+curl http://localhost:3000/api/v1/driver/
 ```
 
-**Response `500`**
-```json
-{
-  "success": false,
-  "message": "Internal Server Error"
-}
-```
-
----
-
-#### `POST /api/v1/driver/`
-
-Creates a new delivery driver. Names are automatically encrypted before being stored.
-
-**Request body**
-```json
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "company": "Fast Logistics",
-  "ppeCharterValid": true,
-  "ppeSignatureDate": "2023-10-01T08:30:00.000Z"
-}
-```
-
-| Field              | Type      | Required | Description                             |
-|--------------------|-----------|----------|-----------------------------------------|
-| `firstName`        | `string`  | ✅        | Driver's first name (will be encrypted) |
-| `lastName`         | `string`  | ✅        | Driver's last name (will be encrypted)  |
-| `company`          | `string`  | ✅        | Company name                            |
-| `ppeCharterValid`  | `boolean` | No       | PPE charter signed? Default: `false`    |
-| `ppeSignatureDate` | `string`  | No       | ISO 8601 date string. Default: `null`   |
-
-**Response `201`**
-```json
-{
-  "success": true,
-  "message": "Driver created successfully",
-  "data": {
-    "driverId": 1,
-    "encryptedFirstName": "a1b2c3...:d4e5f6...",
-    "encryptedLastName": "f1e2d3...:c4b5a6...",
-    "company": "Fast Logistics",
+**Example - Create Driver**:
+```bash
+curl -X POST http://localhost:3000/api/v1/driver/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "John",
+    "lastName": "Doe",
+    "companyId": "comp123",
     "ppeCharterValid": true,
-    "ppeSignatureDate": "2023-10-01T08:30:00.000Z"
-  }
-}
+    "ppeSignatureDate": "2024-03-17"
+  }'
 ```
-
-**Response `400`** — missing required fields
-```json
-{
-  "success": false,
-  "message": "firstName, lastName, and company are required fields."
-}
-```
-
-**Response `500`**
-```json
-{
-  "success": false,
-  "message": "Internal Server Error"
-}
-```
-
----
 
 ### Vehicles
 
-#### `GET /api/v1/vehicle/plate/:licensePlate`
+| Method | Endpoint | Handler | Response |
+|--------|----------|---------|----------|
+| GET | `/api/v1/vehicle/` | getAllVehicles | `{ success: true, data: [...] }` |
+| GET | `/api/v1/vehicle/plate/:licensePlate` | getVehicleByPlate | `{ success: true, data: {...} }` |
 
-Returns a vehicle by its license plate, including the associated driver (with decrypted names).
-
-**URL params**
-
-| Param          | Type     | Description                       |
-|----------------|----------|-----------------------------------|
-| `licensePlate` | `string` | e.g. `AA-123-BB`                  |
-
-**Example request**
+**Example - Get Vehicle**:
 ```bash
-curl http://localhost:3000/api/v1/vehicle/plate/AA-123-BB
+curl http://localhost:3000/api/v1/vehicle/plate/ABC123
 ```
 
-**Response `200`**
-```json
-{
-  "success": true,
-  "data": {
-    "vehicleId": 1,
-    "licensePlate": "AA-123-BB",
-    "vehicleType": "LCV",
-    "driverId": 1,
-    "DeliveryDriver": {
-      "driverId": 1,
-      "encryptedFirstName": "John",
-      "encryptedLastName": "Doe",
-      "company": "Fast Logistics"
-    }
-  }
-}
-```
-
-**Response `404`** — vehicle not found
-```json
-{
-  "success": false,
-  "message": "Vehicle with license plate XX-000-XX not found."
-}
-```
-
-**Response `500`**
-```json
-{
-  "success": false,
-  "message": "Internal Server Error"
-}
+### Health Check
+```bash
+curl http://localhost:3000/health
 ```
 
 ---
 
-## Security
+## 📦 Available Scripts
 
-| Concern              | Approach                                                                     |
-|----------------------|------------------------------------------------------------------------------|
-| HTTP headers         | [`helmet`](https://helmetjs.github.io/) sets secure default headers          |
-| CORS                 | [`cors`](https://github.com/expressjs/cors) enabled globally                 |
-| Sensitive data at rest | AES-256-CBC encryption on driver names via Sequelize hooks                 |
-| Passwords            | SHA-256 one-way hash for employee passwords                                  |
-| Secrets              | All credentials in `.env`, never committed to source control                 |
-| Key management       | `ENCRYPTION_KEY` must be exactly 32 chars; rotate carefully in production    |
+```bash
+# Development mode (with hot reload)
+pnpm dev
+
+# Build for production
+pnpm build
+
+# Start production server
+pnpm start
+```
 
 ---
 
-## Development Notes
+## 🗄️ Database
 
-- **Path alias** `@/*` maps to `src/*` (configured in `tsconfig.json`). At runtime, `tsconfig-paths` resolves these aliases.
-- **Schema sync** runs on every startup with `alter: true`, which safely migrates existing tables without dropping data.
-- **Encryption key drift:** if you reseed the database or switch environments, ensure `ENCRYPTION_KEY` matches the key used during encryption. Mismatches cause `ERR_OSSL_WRONG_FINAL_BLOCK_LENGTH` at runtime.
-- **phpMyAdmin** is available at [http://localhost:8080](http://localhost:8080) when Docker is running — useful for inspecting raw encrypted values.
+### Models (from `@les-desesperes/ensto-db`)
+- **DeliveryDriver** - Delivery driver records with encryption
+- **Vehicle** - Vehicle records with driver associations
+- **HistoryLog** - Audit trail
+
+### Encryption
+All sensitive fields are automatically encrypted/decrypted via Sequelize hooks:
+- **AES-256**: Data encryption
+- **SHA-256**: Hash fields
+
+No manual encryption needed!
+
+### Docker Compose
+
+```bash
+# Start all services
+docker-compose up -d
+
+# MySQL + phpMyAdmin
+# API at http://localhost:3000
+# phpMyAdmin at http://localhost:8080
+
+# View logs
+docker-compose logs -f
+
+# Stop all
+docker-compose down
+```
+
+For custom credentials → See [QUICK_START.md](./QUICK_START.md)
+
+---
+
+## 🔐 Security Features
+
+- ✅ **Helmet.js** - Secure HTTP headers
+- ✅ **CORS** - Cross-Origin Resource Sharing
+- ✅ **AES-256 Encryption** - Sensitive data protection
+- ✅ **SHA-256 Hashing** - Field hashing via Sequelize
+- ✅ **Error Handling** - Graceful error responses
+- ✅ **Environment Variables** - Sensitive config from `.env`
+
+---
+
+## 🧪 Testing
+
+All layers support testing via dependency injection:
+
+```typescript
+// Mock service for testing controller
+const mockService = {
+    getAllDrivers: jest.fn().mockResolvedValue([])
+};
+
+// Inject mock into controller
+const controller = new DeliveryDriverController(mockService);
+
+// Test handler
+const handlers = controller.getHandlers();
+await handlers.getAllDrivers(req, res);
+
+expect(mockService.getAllDrivers).toHaveBeenCalled();
+```
+
+---
+
+## 📚 Detailed Documentation
+
+- **[QUICK_START.md](./QUICK_START.md)** - Setup, Docker, endpoints, troubleshooting
+
+---
+
+## ❓ Common Issues
+
+### MySQL Connection Error
+```
+Access denied for user 'ensto_user'@'192.168.65.1'
+```
+**Solution**: Verify `.env` credentials match MySQL user/password
+
+### Encryption Error
+```
+error:1C80006B:Provider routines::wrong final block length
+```
+**Solution**: Check database credentials are correct; clear & reseed data
+
+### TypeScript Build Error
+```
+Cannot find module '@/...'
+```
+**Solution**: Ensure `tsconfig-paths/register` in dev script (already configured)
+
+See [QUICK_START.md](./QUICK_START.md) for more troubleshooting
+
+---
+
+## 🎯 Next Steps
+
+1. **Setup**: Follow [QUICK_START.md](./QUICK_START.md)
+2**Develop**: Add validation (Zod), authentication (JWT), testing
+3**Deploy**: Setup CI/CD, monitoring, logging
+
+---
+
+## 📄 License
+
+ISC
+
+---
