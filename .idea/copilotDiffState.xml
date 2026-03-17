@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/src/controllers/index.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/src/controllers/index.ts" />
+              <option name="originalContent" value="export { DeliveryDriverController } from './DeliveryDriverController';&#10;export { VehicleController } from './VehicleController';&#10;&#10;" />
+              <option name="updatedContent" value="export { DeliveryDriverController } from './DeliveryDriverController';&#10;export { VehicleController } from './vehicleController';" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

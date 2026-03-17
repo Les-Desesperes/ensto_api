@@ -1,3 +1,2 @@
 export { DeliveryDriverController } from './DeliveryDriverController';
-export { VehicleController } from './VehicleController';
-
+export { VehicleController } from './vehicleController';
