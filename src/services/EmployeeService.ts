@@ -62,5 +62,25 @@ export class EmployeeService implements IService {
             };
         }
     }
-}
 
+    async getEmployeeByBadgeUuid(id: string): Promise<any | null> {
+        if (!id) {
+            throw {
+                statusCode: 400,
+                message: 'RFID id is required.',
+            };
+        }
+
+        try {
+            return await Employee.findOne({
+                where: { badgeUuid: id },
+            });
+        } catch (error) {
+            console.error('Error fetching employee by RFID:', error);
+            throw {
+                statusCode: 500,
+                message: 'Failed to fetch employee by RFID',
+            };
+        }
+    }
+}

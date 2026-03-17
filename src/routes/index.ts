@@ -28,6 +28,7 @@ router.get('/', (req, res) => {
 router.use('/driver', driverRoute.getRouter());
 router.use('/vehicle', vehicleRoute.getRouter());
 router.use('/employee', employeeRoute.getRouter());
+router.use('/employees', employeeRoute.getRouter());
 router.use('/visitor', visitorRoute.getRouter());
 router.use('/history-log', historyLogRoute.getRouter());
 

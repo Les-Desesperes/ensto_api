@@ -10,6 +10,7 @@ export class EmployeeController implements IController {
         this.employeeService = employeeService;
         this.getAllEmployees = this.getAllEmployees.bind(this);
         this.createEmployee = this.createEmployee.bind(this);
+        this.getByRFID = this.getByRFID.bind(this);
     }
 
     private async getAllEmployees(req: Request, res: Response): Promise<void> {
@@ -29,11 +30,26 @@ export class EmployeeController implements IController {
 
         successResponse(res, 201, employee, 'Employee created successfully');
     }
+    
+    private async getByRFID(req: Request, res: Response): Promise<void> {
+        const id = req.params.id as string;
+        const employee = await this.employeeService.getEmployeeByBadgeUuid(id);
+
+        if (!employee) {
+            throw {
+                statusCode: 404,
+                message: 'Employee not found',
+            };
+        }
+
+        successResponse(res, 200, employee);
+    }
 
     public getHandlers() {
         return {
             getAllEmployees: asyncHandler(this.getAllEmployees),
             createEmployee: asyncHandler(this.createEmployee),
+            getByRFID: asyncHandler(this.getByRFID),
         };
     }
 

@@ -1,7 +1,7 @@
-import { Router } from 'express';
-import { IRoute } from '@/shared/interfaces';
-import { EmployeeController } from '@/controllers';
-import { EmployeeService } from '@/services/EmployeeService';
+import {Router} from 'express';
+import {IRoute} from '@/shared/interfaces';
+import {EmployeeController} from '@/controllers';
+import {EmployeeService} from '@/services/EmployeeService';
 
 /**
  * EmployeeRoute
@@ -24,6 +24,9 @@ export class EmployeeRoute implements IRoute {
 
         // GET /api/v1/employee/ - Fetch all employees
         this.router.get('/', handlers.getAllEmployees);
+
+        // GET /api/v1/employee/rfid/:id - Fetch one employee by RFID
+        this.router.get('/rfid/:id', handlers.getByRFID)
 
         // POST /api/v1/employee/ - Create a new employee
         this.router.post('/', handlers.createEmployee);
