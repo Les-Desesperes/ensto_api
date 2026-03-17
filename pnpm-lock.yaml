@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@les-desesperes/ensto-db':
-        specifier: ^1.1.0
-        version: 1.1.0(@types/node@25.4.0)
+        specifier: ^1.1.3
+        version: 1.1.3(@types/node@25.4.0)
       cors:
         specifier: ^2.8.6
         version: 2.8.6
@@ -74,8 +74,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@les-desesperes/ensto-db@1.1.0':
-    resolution: {integrity: sha512-+VWzvmdwmnM1FQLW77Wk4JMQihKTaj46GWdHdv/rhD5F+/Y5ngWRf4fONdd//7/PMi6B2YwewmzmKOIs+6Jmdw==}
+  '@les-desesperes/ensto-db@1.1.3':
+    resolution: {integrity: sha512-bLdHVow+epjw1KsKmZC9fr6EvrOF8A6N7swc5cA6yUpxCuKwOYj7GrMblvyv/OUBDLbsCbNtmTR7+WjQhxmuow==}
 
   '@tsconfig/node10@1.0.12':
     resolution: {integrity: sha512-UCYBaeFvM11aU2y3YPZ//O5Rhj+xKyzy7mvcIoAjASbigy8mHMryP5cK7dgjlz2hWxh1g5pLw084E0a/wlUSFQ==}
@@ -810,7 +810,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@les-desesperes/ensto-db@1.1.0(@types/node@25.4.0)':
+  '@les-desesperes/ensto-db@1.1.3(@types/node@25.4.0)':
     dependencies:
       dotenv: 16.6.1
       mysql2: 3.19.1(@types/node@25.4.0)
