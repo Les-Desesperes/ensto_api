@@ -79,7 +79,7 @@ export class EmployeeService implements IService {
                 message: 'User not found.',
             };
 
-            return { status: 200, data: { id: user.employeeId, badgeUuid: user.badgeUuid } };
+            return  { id: user.employeeId, badgeUuid: user.badgeUuid }
         } catch (error) {
             console.error('Error fetching employee by RFID:', error);
             throw {
