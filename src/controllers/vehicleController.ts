@@ -26,6 +26,8 @@ export class VehicleController implements IController {
         // Bind methods to ensure 'this' context is preserved in Express routes
         this.getVehicleByPlate = this.getVehicleByPlate.bind(this);
         this.getAllVehicles = this.getAllVehicles.bind(this);
+        this.storeTempPlate = this.storeTempPlate.bind(this);
+        this.getTempPlate = this.getTempPlate.bind(this);
     }
 
     /**
@@ -51,6 +53,17 @@ export class VehicleController implements IController {
         successResponse(res, 200, vehicles);
     }
 
+    private async storeTempPlate(req: Request, res: Response): Promise<void> {
+        const licensePlate = req.body?.licensePlate as string;
+        const tempPlate = await this.vehicleService.storeTempPlate(licensePlate);
+        successResponse(res, 200, tempPlate, 'Temporary plate stored successfully');
+    }
+
+    private async getTempPlate(req: Request, res: Response): Promise<void> {
+        const tempPlate = await this.vehicleService.getTempPlate();
+        successResponse(res, 200, tempPlate ?? null);
+    }
+
     /**
      * Public method to get wrapped handlers
      * Returns the handlers wrapped with asyncHandler to catch errors
@@ -59,6 +72,8 @@ export class VehicleController implements IController {
         return {
             getVehicleByPlate: asyncHandler(this.getVehicleByPlate),
             getAllVehicles: asyncHandler(this.getAllVehicles),
+            storeTempPlate: asyncHandler(this.storeTempPlate),
+            getTempPlate: asyncHandler(this.getTempPlate),
         };
     }
 

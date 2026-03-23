@@ -1,4 +1,4 @@
-import { Vehicle, DeliveryDriver, sequelize } from '@les-desesperes/ensto-db';
+import {Vehicle, DeliveryDriver, sequelize, TempPlate} from '@les-desesperes/ensto-db';
 import { IService } from '@/shared/interfaces';
 
 /**
@@ -11,6 +11,10 @@ import { IService } from '@/shared/interfaces';
  * - Dependency Inversion: Depends on abstractions (IService), not concrete implementations
  */
 export class VehicleService implements IService {
+    private async ensureTempPlateTable(): Promise<void> {
+        await TempPlate.sync();
+    }
+
     /**
      * Retrieves a vehicle by its license plate.
      * Includes associated driver information.
@@ -79,6 +83,59 @@ export class VehicleService implements IService {
             throw {
                 statusCode: 500,
                 message: 'Failed to fetch vehicles',
+            };
+        } finally {
+            await sequelize.close();
+        }
+    }
+
+    async storeTempPlate(licensePlate: string): Promise<{ licensePlate: string }> {
+        if (!licensePlate || !licensePlate.trim()) {
+            throw {
+                statusCode: 400,
+                message: 'licensePlate is required.',
+            };
+        }
+
+        const normalizedPlate = licensePlate.trim().toUpperCase();
+
+        try {
+            await sequelize.authenticate();
+            await this.ensureTempPlateTable();
+
+            await TempPlate.upsert({
+                singletonId: 1,
+                licensePlate: normalizedPlate,
+            });
+
+            return { licensePlate: normalizedPlate };
+        } catch (error) {
+            console.error('Error storing temp plate:', error);
+            throw {
+                statusCode: 500,
+                message: 'Failed to store temporary license plate',
+            };
+        } finally {
+            await sequelize.close();
+        }
+    }
+
+    async getTempPlate(): Promise<{ licensePlate: string } | null> {
+        try {
+            await sequelize.authenticate();
+            await this.ensureTempPlateTable();
+
+            const record = await TempPlate.findByPk(1);
+            if (!record) {
+                return null;
+            }
+
+            return { licensePlate: record.licensePlate };
+        } catch (error) {
+            console.error('Error fetching temp plate:', error);
+            throw {
+                statusCode: 500,
+                message: 'Failed to fetch temporary license plate',
             };
         } finally {
             await sequelize.close();

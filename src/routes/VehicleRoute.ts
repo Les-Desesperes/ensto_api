@@ -43,6 +43,12 @@ export class VehicleRoute implements IRoute {
 
         // GET /api/v1/vehicle/plate/:licensePlate - Get vehicle by license plate
         this.router.get('/plate/:licensePlate', handlers.getVehicleByPlate);
+
+        // POST /api/v1/vehicle/temp-plate - Store a temporary license plate
+        this.router.post('/temp-plate', handlers.storeTempPlate);
+
+        // GET /api/v1/vehicle/temp-plate - Retrieve the temporary license plate
+        this.router.get('/temp-plate', handlers.getTempPlate);
     }
 
     /**
