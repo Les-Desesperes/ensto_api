@@ -37,6 +37,8 @@ export class VehicleRoute implements IRoute {
      */
     private initializeRoutes(): void {
         const handlers = this.controller.getHandlers();
+        const storeTempPlateHandler = handlers.storeTempPlate ?? handlers.storeTemporaryPlate;
+        const getTempPlateHandler = handlers.getTempPlate ?? handlers.getTemporaryPlate;
 
         // GET /api/v1/vehicle/ - Fetch all vehicles
         this.router.get('/', handlers.getAllVehicles);
@@ -45,10 +47,10 @@ export class VehicleRoute implements IRoute {
         this.router.get('/plate/:licensePlate', handlers.getVehicleByPlate);
 
         // POST /api/v1/vehicle/temp-plate - Store a temporary license plate
-        this.router.post('/temp-plate', handlers.storeTempPlate);
+        this.router.post('/temp-plate', storeTempPlateHandler);
 
         // GET /api/v1/vehicle/temp-plate - Retrieve the temporary license plate
-        this.router.get('/temp-plate', handlers.getTempPlate);
+        this.router.get('/temp-plate', getTempPlateHandler);
     }
 
     /**

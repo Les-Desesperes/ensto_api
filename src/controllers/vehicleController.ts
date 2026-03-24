@@ -1,4 +1,4 @@
-import { Request, Response, Router } from 'express';
+import { Request, Response, RequestHandler, Router } from 'express';
 import { IController } from '@/shared/interfaces';
 import { VehicleService } from '@/services';
 import { asyncHandler, successResponse } from '@/shared/utils';
@@ -68,12 +68,20 @@ export class VehicleController implements IController {
      * Public method to get wrapped handlers
      * Returns the handlers wrapped with asyncHandler to catch errors
      */
-    public getHandlers() {
+    public getHandlers(): VehicleRouteHandlers {
+        const getVehicleByPlate = asyncHandler(this.getVehicleByPlate);
+        const getAllVehicles = asyncHandler(this.getAllVehicles);
+        const storeTempPlate = asyncHandler(this.storeTempPlate);
+        const getTempPlate = asyncHandler(this.getTempPlate);
+
         return {
-            getVehicleByPlate: asyncHandler(this.getVehicleByPlate),
-            getAllVehicles: asyncHandler(this.getAllVehicles),
-            storeTempPlate: asyncHandler(this.storeTempPlate),
-            getTempPlate: asyncHandler(this.getTempPlate),
+            getVehicleByPlate,
+            getAllVehicles,
+            storeTempPlate,
+            getTempPlate,
+            // Backward-compatible aliases in case route code still uses old names.
+            storeTemporaryPlate: storeTempPlate,
+            getTemporaryPlate: getTempPlate,
         };
     }
 
@@ -85,3 +93,13 @@ export class VehicleController implements IController {
         return {} as Router;
     }
 }
+
+export type VehicleRouteHandlers = {
+    getVehicleByPlate: RequestHandler;
+    getAllVehicles: RequestHandler;
+    storeTempPlate: RequestHandler;
+    getTempPlate: RequestHandler;
+    storeTemporaryPlate: RequestHandler;
+    getTemporaryPlate: RequestHandler;
+};
+
