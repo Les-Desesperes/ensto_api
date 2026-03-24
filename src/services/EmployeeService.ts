@@ -8,6 +8,8 @@ export interface CreateEmployeeInput {
     badgeUuid: string;
     passwordHash: string;
     role: EmployeeRole;
+    firstName: string;
+    lastName: string;
 }
 
 export class EmployeeService implements IService {
@@ -24,12 +26,12 @@ export class EmployeeService implements IService {
     }
 
     async createEmployee(input: CreateEmployeeInput): Promise<any> {
-        const { username, badgeUuid, passwordHash, role } = input;
+        const { username, badgeUuid, passwordHash, role, firstName, lastName } = input;
 
-        if (!username || !badgeUuid || !passwordHash || !role) {
+        if (!username || !badgeUuid || !passwordHash || !role || !firstName || !lastName) {
             throw {
                 statusCode: 400,
-                message: 'username, badgeUuid, passwordHash, and role are required fields.',
+                message: 'username, badgeUuid, passwordHash, role, firstName and lastName are required fields.',
             };
         }
 
@@ -53,6 +55,8 @@ export class EmployeeService implements IService {
                 badgeUuid,
                 passwordHash,
                 role,
+                firstName,
+                lastName
             });
         } catch (error) {
             console.error('Error creating employee in database:', error);

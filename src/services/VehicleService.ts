@@ -1,4 +1,4 @@
-import {Vehicle, DeliveryDriver, sequelize, TempPlate} from '@les-desesperes/ensto-db';
+import {Vehicle, DeliveryDriver, TempPlate} from '@les-desesperes/ensto-db';
 import { IService } from '@/shared/interfaces';
 
 /**
@@ -11,10 +11,7 @@ import { IService } from '@/shared/interfaces';
  * - Dependency Inversion: Depends on abstractions (IService), not concrete implementations
  */
 export class VehicleService implements IService {
-    private async ensureTempPlateTable(): Promise<void> {
-        await TempPlate.sync();
-    }
-
+    
     /**
      * Retrieves a vehicle by its license plate.
      * Includes associated driver information.
@@ -23,8 +20,6 @@ export class VehicleService implements IService {
      */
     async getVehicleByPlate(licensePlate: string): Promise<any> {
         try {
-            await sequelize.authenticate();
-
             const vehicle = await Vehicle.findOne({
                 where: { licensePlate },
                 include: [
@@ -55,8 +50,6 @@ export class VehicleService implements IService {
                 statusCode: 500,
                 message: 'Failed to fetch vehicle',
             };
-        } finally {
-            await sequelize.close();
         }
     }
 
@@ -66,8 +59,6 @@ export class VehicleService implements IService {
      */
     async getAllVehicles(): Promise<any[]> {
         try {
-            await sequelize.authenticate();
-
             const vehicles = await Vehicle.findAll({
                 include: [
                     {
@@ -84,8 +75,6 @@ export class VehicleService implements IService {
                 statusCode: 500,
                 message: 'Failed to fetch vehicles',
             };
-        } finally {
-            await sequelize.close();
         }
     }
 
@@ -100,9 +89,6 @@ export class VehicleService implements IService {
         const normalizedPlate = licensePlate.trim().toUpperCase();
 
         try {
-            await sequelize.authenticate();
-            await this.ensureTempPlateTable();
-
             await TempPlate.upsert({
                 singletonId: 1,
                 licensePlate: normalizedPlate,
@@ -115,16 +101,11 @@ export class VehicleService implements IService {
                 statusCode: 500,
                 message: 'Failed to store temporary license plate',
             };
-        } finally {
-            await sequelize.close();
         }
     }
 
     async getTempPlate(): Promise<{ licensePlate: string } | null> {
         try {
-            await sequelize.authenticate();
-            await this.ensureTempPlateTable();
-
             const record = await TempPlate.findByPk(1);
             if (!record) {
                 return null;
@@ -137,8 +118,6 @@ export class VehicleService implements IService {
                 statusCode: 500,
                 message: 'Failed to fetch temporary license plate',
             };
-        } finally {
-            await sequelize.close();
         }
     }
 }
