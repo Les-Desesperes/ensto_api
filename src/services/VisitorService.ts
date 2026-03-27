@@ -1,5 +1,6 @@
 import { Visitor } from '@les-desesperes/ensto-db';
 import { IService } from '@/shared/interfaces';
+import logger from '@/shared/logger';
 
 export interface CreateVisitorInput {
     fullName: string;
@@ -12,7 +13,7 @@ export class VisitorService implements IService {
         try {
             return await Visitor.findAll();
         } catch (error) {
-            console.error('Error fetching visitors from database:', error);
+            logger.error({ err: error }, 'Error fetching visitors from database');
             throw {
                 statusCode: 500,
                 message: 'Failed to fetch visitors',
@@ -47,7 +48,7 @@ export class VisitorService implements IService {
                 arrivalTime: parsedArrivalTime,
             });
         } catch (error) {
-            console.error('Error creating visitor in database:', error);
+            logger.error({ err: error }, 'Error creating visitor in database');
             throw {
                 statusCode: 500,
                 message: 'Failed to create visitor',

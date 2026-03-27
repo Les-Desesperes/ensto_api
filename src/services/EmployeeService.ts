@@ -1,5 +1,6 @@
 import { Employee } from '@les-desesperes/ensto-db';
 import { IService } from '@/shared/interfaces';
+import logger from '@/shared/logger';
 
 export type EmployeeRole = 'Admin' | 'Magasinier' | 'Personnel';
 
@@ -17,7 +18,7 @@ export class EmployeeService implements IService {
         try {
             return await Employee.findAll();
         } catch (error) {
-            console.error('Error fetching employees from database:', error);
+            logger.error({ err: error }, 'Error fetching employees from database');
             throw {
                 statusCode: 500,
                 message: 'Failed to fetch employees',
@@ -59,7 +60,7 @@ export class EmployeeService implements IService {
                 lastName
             });
         } catch (error) {
-            console.error('Error creating employee in database:', error);
+            logger.error({ err: error }, 'Error creating employee in database');
             throw {
                 statusCode: 500,
                 message: 'Failed to create employee',
@@ -85,7 +86,7 @@ export class EmployeeService implements IService {
 
             return  { id: user.employeeId, badgeUuid: user.badgeUuid }
         } catch (error) {
-            console.error('Error fetching employee by RFID:', error);
+            logger.error({ err: error }, 'Error fetching employee by RFID');
             throw {
                 statusCode: 500,
                 message: 'Failed to fetch employee by RFID',

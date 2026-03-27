@@ -2,6 +2,7 @@ import http from 'http';
 import app from '@/app';
 import { EnstoDatabase } from '@les-desesperes/ensto-db';
 import { initializeWebSocket } from '@/websockets';
+import logger from '@/shared/logger';
 
 /**
  * Server Class
@@ -32,23 +33,21 @@ class Server {
 
             // 4. Start listening
             server.listen(this.port, () => {
-                console.log(
-                    `🚀 Server is running in ${process.env.NODE_ENV || 'development'} mode`
-                );
-                console.log(`📍 http://localhost:${this.port}`);
-                console.log(`💬 WebSocket is ready for connections`);
+                logger.info({ env: process.env.NODE_ENV || 'development', port: this.port }, '🚀 Server is running');
+                logger.info({ url: `http://localhost:${this.port}` }, '📍 Server URL');
+                logger.info('💬 WebSocket is ready for connections');
             });
 
             // Graceful shutdown
             process.on('SIGINT', async () => {
-                console.log('\n⏹️  Shutting down gracefully...');
+                logger.info('\n⏹️  Shutting down gracefully...');
                 server.close(() => {
-                    console.log('✅ Server shut down');
+                    logger.info('✅ Server shut down');
                     process.exit(0);
                 });
             });
         } catch (error) {
-            console.error('❌ Failed to start the server:', error);
+            logger.error({ err: error }, '❌ Failed to start the server:');
             process.exit(1);
         }
     }
@@ -72,16 +71,16 @@ class Server {
         try {
             // Authenticate database connection
             await db.authenticate();
-            console.log('✅ Connected to MySQL database.');
+            logger.info('✅ Connected to MySQL database.');
 
             // Initialize models
             db.initDefaultModels();
             await db.sync({ alter: true });
 
-            console.log('✅ All database tables synchronized.');
+            logger.info('✅ All database tables synchronized.');
         } catch (error) {
             await db.close();
-            console.error('❌ Failed to connect to database:', error);
+            logger.error({ err: error }, '❌ Failed to connect to database:');
             throw error;
         }
     }

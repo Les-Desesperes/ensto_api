@@ -1,5 +1,6 @@
 import { Company } from '@les-desesperes/ensto-db';
 import { IService } from '@/shared/interfaces';
+import logger from '@/shared/logger';
 
 export interface CreateCompanyInput {
     name: string;
@@ -27,7 +28,7 @@ export class CompanyService implements IService {
             return company;
         } catch (err) {
             const error = err as any;
-            console.error('Error creating company:', error);
+            logger.error({ err: error }, 'Error creating company');
             throw {
                 statusCode: 500,
                 message: 'Failed to create company',
@@ -40,7 +41,7 @@ export class CompanyService implements IService {
             return await Company.findAll();
         } catch (err) {
             const error = err as any;
-            console.error('Error fetching companies:', error);
+            logger.error({ err: error }, 'Error fetching companies');
             throw {
                 statusCode: 500,
                 message: 'Failed to fetch companies',
@@ -67,7 +68,7 @@ export class CompanyService implements IService {
         } catch (err) {
             const error = err as any;
             if (error?.statusCode) throw error;
-            console.error('Error fetching company by name:', error);
+            logger.error({ err: error }, 'Error fetching company by name');
             throw {
                 statusCode: 500,
                 message: 'Failed to fetch company by name',
@@ -94,7 +95,7 @@ export class CompanyService implements IService {
         } catch (err) {
             const error = err as any;
             if (error?.statusCode) throw error;
-            console.error('Error fetching company by id:', error);
+            logger.error({ err: error }, 'Error fetching company by id');
             throw {
                 statusCode: 500,
                 message: 'Failed to fetch company by id',

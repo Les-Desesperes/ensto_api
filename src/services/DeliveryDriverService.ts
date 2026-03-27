@@ -1,6 +1,7 @@
 import { DeliveryDriver } from '@les-desesperes/ensto-db';
 import { IService } from '@/shared/interfaces';
 import { broadcastNotification } from '@/websockets';
+import logger from '@/shared/logger';
 
 /**
  * DeliveryDriverService
@@ -22,7 +23,7 @@ export class DeliveryDriverService implements IService {
             const drivers = await DeliveryDriver.findAll();
             return drivers;
         } catch (error) {
-            console.error('Error fetching drivers from database:', error);
+            logger.error({ err: error }, 'Error fetching drivers from database');
             throw {
                 statusCode: 500,
                 message: 'Failed to fetch drivers',
@@ -80,7 +81,7 @@ export class DeliveryDriverService implements IService {
 
             return newDriver;
         } catch (error) {
-            console.error('Error creating driver in database:', error);
+            logger.error({ err: error }, 'Error creating driver in database');
             throw {
                 statusCode: 500,
                 message: 'Failed to create driver',
@@ -100,7 +101,7 @@ export class DeliveryDriverService implements IService {
             });
             return driver;
         } catch (error) {
-            console.error('Error fetching driver by ID:', error);
+            logger.error({ err: error }, 'Error fetching driver by ID');
             throw {
                 statusCode: 500,
                 message: 'Failed to fetch driver',
