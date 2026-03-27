@@ -52,7 +52,7 @@ export class DeliveryDriverController implements IController {
         const { firstName, lastName, companyId, ppeCharterValid, ppeSignatureDate } = req.body;
 
         // validate company exists
-        const company = await this.companyService.getCompanyById(companyId);
+        //const company = await this.companyService.getCompanyById(companyId);
 
         const newDriver = await this.driverService.createDriver(
             firstName,
