@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import apiRoutes from '@/routes';
 import { errorHandler } from '@/shared/middleware';
+import logger, { requestLogger } from '@/shared/logger';
 
 /**
  * App Class
@@ -44,11 +45,8 @@ export class App {
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
 
-        // Optional: Add request logging middleware
-        this.app.use((req: Request, res: Response, next) => {
-            console.log(`📨 ${req.method} ${req.path}`);
-            next();
-        });
+        // Request logging middleware (pino)
+        this.app.use(requestLogger);
 
         // Optional: Add Bearer token authentication middleware to protected routes
         // this.app.use('/api/v1', authMiddleware);
