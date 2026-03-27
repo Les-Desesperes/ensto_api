@@ -19,13 +19,15 @@ export class EmployeeController implements IController {
     }
 
     private async createEmployee(req: Request, res: Response): Promise<void> {
-        const { username, badgeUuid, passwordHash, role } = req.body;
+        const { username, badgeUuid, passwordHash, role, firstName, lastName } = req.body;
 
         const employee = await this.employeeService.createEmployee({
             username,
             badgeUuid,
             passwordHash,
             role: role as EmployeeRole,
+            firstName: firstName ?? '',
+            lastName: lastName ?? '',
         });
 
         successResponse(res, 201, employee, 'Employee created successfully');

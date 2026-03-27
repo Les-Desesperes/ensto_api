@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { IController } from '@/shared/interfaces';
-import { DeliveryDriverService } from '@/services';
+import { DeliveryDriverService, CompanyService } from '@/services';
 import { asyncHandler, successResponse } from '@/shared/utils';
 
 /**
@@ -16,6 +16,7 @@ import { asyncHandler, successResponse } from '@/shared/utils';
  */
 export class DeliveryDriverController implements IController {
     private driverService: DeliveryDriverService;
+    private companyService: CompanyService;
 
     /**
      * Constructor with Dependency Injection
@@ -23,6 +24,8 @@ export class DeliveryDriverController implements IController {
      */
     constructor(driverService: DeliveryDriverService) {
         this.driverService = driverService;
+        // Initialize company service (dependency created locally)
+        this.companyService = new CompanyService();
         // Bind methods to ensure 'this' context is preserved in Express routes
         this.getAllDrivers = this.getAllDrivers.bind(this);
         this.createDriver = this.createDriver.bind(this);
@@ -47,6 +50,9 @@ export class DeliveryDriverController implements IController {
      */
     private async createDriver(req: Request, res: Response): Promise<void> {
         const { firstName, lastName, companyId, ppeCharterValid, ppeSignatureDate } = req.body;
+
+        // validate company exists
+        const company = await this.companyService.getCompanyById(companyId);
 
         const newDriver = await this.driverService.createDriver(
             firstName,
