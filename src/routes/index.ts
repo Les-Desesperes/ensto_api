@@ -4,6 +4,7 @@ import { VehicleRoute } from './VehicleRoute';
 import { EmployeeRoute } from './EmployeeRoute';
 import { VisitorRoute } from './VisitorRoute';
 import { HistoryLogRoute } from './HistoryLogRoute';
+import {CompanyRoute} from "@/routes/CompanyRoute";
 
 /**
  * @openapi
@@ -37,6 +38,7 @@ const vehicleRoute = new VehicleRoute();
 const employeeRoute = new EmployeeRoute();
 const visitorRoute = new VisitorRoute();
 const historyLogRoute = new HistoryLogRoute();
+const companyRoute = new CompanyRoute();
 
 // Welcome route
 router.get('/', (req, res) => {
@@ -50,5 +52,6 @@ router.use('/employee', employeeRoute.getRouter());
 router.use('/employees', employeeRoute.getRouter());
 router.use('/visitor', visitorRoute.getRouter());
 router.use('/history-log', historyLogRoute.getRouter());
+router.use('/company', companyRoute.getRouter());
 
 export default router;

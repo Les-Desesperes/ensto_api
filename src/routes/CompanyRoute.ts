@@ -73,7 +73,8 @@ export class CompanyRoute implements IRoute {
     private initializeRoutes(): void {
         const handlers = this.controller.getHandlers();
 
-        // GET /api/v1/company/ - Fetch all companies
+        // GET /api/v1/company and /api/v1/company/ - Fetch all companies
+        this.router.get('', handlers.getAllCompanies);
         this.router.get('/', handlers.getAllCompanies);
 
         // GET /api/v1/company/:name - Fetch one company summary by name
