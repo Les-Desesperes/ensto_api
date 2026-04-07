@@ -4,6 +4,72 @@ import { DeliveryDriverController } from '@/controllers';
 import { DeliveryDriverService } from '@/services';
 
 /**
+ * @openapi
+ * /api/v1/driver:
+ *   get:
+ *     tags: [Driver]
+ *     summary: Get all delivery drivers
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Drivers fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *   post:
+ *     tags: [Driver]
+ *     summary: Create a delivery driver
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               companyId:
+ *                 type: string
+ *               ppeCharterValid:
+ *                 type: boolean
+ *               ppeSignatureDate:
+ *                 type: string
+ *                 format: date-time
+ *             required: [firstName, lastName, companyId]
+ *     responses:
+ *       201:
+ *         description: Driver created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+/**
  * DeliveryDriverRoute
  * Responsible for initializing the controller and binding Express router endpoints.
  * This class handles all driver-related routes.

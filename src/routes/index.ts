@@ -6,6 +6,25 @@ import { VisitorRoute } from './VisitorRoute';
 import { HistoryLogRoute } from './HistoryLogRoute';
 
 /**
+ * @openapi
+ * /api/v1:
+ *   get:
+ *     tags: [System]
+ *     summary: API welcome endpoint
+ *     responses:
+ *       200:
+ *         description: API welcome message
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Welcome to the API
+ */
+
+/**
  * Main API Router
  * Aggregates all route classes and mounts them to the main router.
  * This is the entry point for all API routes.

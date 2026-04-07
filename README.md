@@ -21,6 +21,7 @@ Data encryption (AES-256) handled transparently via Sequelize hooks from the `@l
 - 📖 [QUICK_START.md](./QUICK_START.md) - Getting started & Docker setup
 - 🏗️ [ARCHITECTURE.md](./ARCHITECTURE.md) - Deep dive into architecture & design patterns
 - 🔄 [REFACTORING_SUMMARY.md](./REFACTORING_SUMMARY.md) - Before/after comparison & migration guide
+- 🧭 [docs/API.md](./docs/API.md) - Complete route contracts and implementation plan
 
 ---
 
@@ -301,6 +302,7 @@ expect(mockService.getAllDrivers).toHaveBeenCalled();
 ## 📚 Detailed Documentation
 
 - **[QUICK_START.md](./QUICK_START.md)** - Setup, Docker, endpoints, troubleshooting
+- **[docs/API.md](./docs/API.md)** - Full endpoint contract (params, body, auth, responses)
 
 ---
 

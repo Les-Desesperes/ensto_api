@@ -4,6 +4,113 @@ import { VehicleController } from '@/controllers';
 import { VehicleService } from '@/services';
 
 /**
+ * @openapi
+ * /api/v1/vehicle:
+ *   get:
+ *     tags: [Vehicle]
+ *     summary: Get all vehicles
+ *     description: Returns all vehicles with related driver details.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Vehicles fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *
+ * /api/v1/vehicle/plate/{licensePlate}:
+ *   get:
+ *     tags: [Vehicle]
+ *     summary: Get vehicle by license plate
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: licensePlate
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Vehicle license plate
+ *     responses:
+ *       200:
+ *         description: Vehicle fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       404:
+ *         description: Vehicle not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *
+ * /api/v1/vehicle/temp-plate:
+ *   post:
+ *     tags: [Vehicle]
+ *     summary: Store temporary license plate
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/StoreTempPlateBody'
+ *     responses:
+ *       200:
+ *         description: Temporary plate stored
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *   get:
+ *     tags: [Vehicle]
+ *     summary: Get temporary license plate
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Temporary plate fetched
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+/**
  * VehicleRoute
  * Responsible for initializing the controller and binding Express router endpoints.
  * This class handles all vehicle-related routes.

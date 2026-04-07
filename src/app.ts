@@ -4,7 +4,8 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import apiRoutes from '@/routes';
 import { errorHandler } from '@/shared/middleware';
-import logger, { requestLogger } from '@/shared/logger';
+import { requestLogger } from '@/shared/logger';
+import { SwaggerConfig } from '@/config/SwaggerConfig';
 
 /**
  * App Class
@@ -17,6 +18,7 @@ import logger, { requestLogger } from '@/shared/logger';
  */
 export class App {
     private app: Application;
+    private swaggerConfig: SwaggerConfig;
 
     /**
      * Constructor
@@ -25,6 +27,7 @@ export class App {
     constructor() {
         dotenv.config();
         this.app = express();
+        this.swaggerConfig = new SwaggerConfig();
         this.setupMiddlewares();
         this.setupRoutes();
         this.setupErrorHandling();
@@ -56,6 +59,8 @@ export class App {
      * Setup all routes
      */
     private setupRoutes(): void {
+        this.swaggerConfig.initialize(this.app);
+
         // Mount API routes
         this.app.use('/api/v1', apiRoutes);
 
