@@ -1,4 +1,5 @@
 import { Application } from 'express';
+import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc, { Options } from 'swagger-jsdoc';
 
@@ -72,7 +73,18 @@ export class SwaggerConfig {
     private readonly spec = swaggerJSDoc(this.options);
 
     public initialize(app: Application): void {
-        app.use('/docs', swaggerUi.serve, swaggerUi.setup(this.spec, { explorer: true }));
+        app.use(
+            '/docs',
+            helmet({ contentSecurityPolicy: false }),
+            swaggerUi.serve,
+            swaggerUi.setup(this.spec, {
+                explorer: true,
+                swaggerOptions: {
+                    persistAuthorization: true,
+                },
+            })
+        );
+
         app.get('/docs.json', (_req, res) => {
             res.status(200).json(this.spec);
         });
