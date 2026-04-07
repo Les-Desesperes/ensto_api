@@ -165,14 +165,53 @@ export class VehicleService implements IService {
         }
     }
 
-    async getTempPlate(): Promise<{ licensePlate: string } | null> {
+    async getTempPlate(): Promise<StoreTempPlateResult | null> {
         try {
             const record = await TempPlate.findByPk(1);
             if (!record) {
                 return null;
             }
 
-            return { licensePlate: record.licensePlate };
+            const normalizedPlate = record.licensePlate?.trim().toUpperCase();
+
+            if (!normalizedPlate) {
+                return null;
+            }
+
+            const existingVehicle = await Vehicle.findOne({
+                where: { licensePlate: normalizedPlate },
+                include: [
+                    {
+                        model: DeliveryDriver,
+                        attributes: ['driverId', 'encryptedFirstName', 'encryptedLastName', 'company'],
+                        include: [
+                            {
+                                model: Company,
+                                attributes: ['name'],
+                                required: false,
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            if (existingVehicle) {
+                const existingPayload = this.extractExistingVehiclePayload(existingVehicle, normalizedPlate);
+                if (existingPayload) {
+                    return {
+                        status: 'existing',
+                        licensePlate: existingPayload.licensePlate,
+                        firstName: existingPayload.firstName ?? '',
+                        lastName: existingPayload.lastName ?? '',
+                        companyName: existingPayload.companyName ?? '',
+                    };
+                }
+            }
+
+            return {
+                status: 'new',
+                licensePlate: normalizedPlate,
+            };
         } catch (error) {
             logger.error({ err: error }, 'Error fetching temp plate');
             throw {

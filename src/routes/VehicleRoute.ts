@@ -93,6 +93,7 @@ import { VehicleService } from '@/services';
  *   get:
  *     tags: [Vehicle]
  *     summary: Get temporary license plate
+ *     description: Returns the stored temporary plate. If that plate matches an existing vehicle, driver and company details are included.
  *     security:
  *       - BearerAuth: []
  *     responses:
