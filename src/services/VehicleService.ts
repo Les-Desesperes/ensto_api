@@ -118,19 +118,12 @@ export class VehicleService implements IService {
                     {
                         model: DeliveryDriver,
                         attributes: ['driverId', 'encryptedFirstName', 'encryptedLastName', 'company'],
-                        include: [
-                            {
-                                model: Company,
-                                attributes: ['name'],
-                                required: false,
-                            },
-                        ],
                     },
                 ],
             });
 
             if (existingVehicle) {
-                const existingPayload = this.extractExistingVehiclePayload(existingVehicle, normalizedPlate);
+                const existingPayload = await this.extractExistingVehiclePayload(existingVehicle, normalizedPlate);
 
                 if (existingPayload) {
                     await this.integrationService.dispatchToExternalDisplay({
@@ -184,19 +177,12 @@ export class VehicleService implements IService {
                     {
                         model: DeliveryDriver,
                         attributes: ['driverId', 'encryptedFirstName', 'encryptedLastName', 'company'],
-                        include: [
-                            {
-                                model: Company,
-                                attributes: ['name'],
-                                required: false,
-                            },
-                        ],
                     },
                 ],
             });
 
             if (existingVehicle) {
-                const existingPayload = this.extractExistingVehiclePayload(existingVehicle, normalizedPlate);
+                const existingPayload = await this.extractExistingVehiclePayload(existingVehicle, normalizedPlate);
                 if (existingPayload) {
                     return {
                         status: 'existing',
@@ -221,7 +207,7 @@ export class VehicleService implements IService {
         }
     }
 
-    private extractExistingVehiclePayload(vehicle: any, licensePlate: string): ExternalDriverPayload | null {
+    private async extractExistingVehiclePayload(vehicle: any, licensePlate: string): Promise<ExternalDriverPayload | null> {
         const candidate = this.extractDriverCandidate(vehicle);
 
         if (!candidate) {
@@ -230,7 +216,7 @@ export class VehicleService implements IService {
 
         const firstName = this.toPlainText(candidate.encryptedFirstName ?? candidate.firstName ?? '');
         const lastName = this.toPlainText(candidate.encryptedLastName ?? candidate.lastName ?? '');
-        const companyName = this.extractCompanyName(candidate);
+        const companyName = await this.extractCompanyName(candidate);
 
         return {
             status: 'existing',
@@ -257,18 +243,37 @@ export class VehicleService implements IService {
         return raw;
     }
 
-    private extractCompanyName(driver: any): string {
-        const nestedCompany = driver?.Company ?? driver?.companyDetails ?? driver?.companyModel ?? null;
+    private async extractCompanyName(driver: any): Promise<string> {
+        const rawCompany = driver?.company;
 
-        if (nestedCompany?.name) {
-            return String(nestedCompany.name);
+        if (rawCompany == null) {
+            return '';
         }
 
-        if (typeof driver?.company === 'string') {
-            return driver.company;
+        const companyToken = String(rawCompany).trim();
+        if (!companyToken) {
+            return '';
         }
 
-        return '';
+        try {
+            const byPk = await Company.findByPk(companyToken as any);
+            if (byPk && typeof (byPk as any).name === 'string') {
+                return (byPk as any).name;
+            }
+        } catch (_err) {
+            // Ignore lookup errors and continue fallback strategy.
+        }
+
+        try {
+            const byName = await Company.findOne({ where: { name: companyToken } });
+            if (byName && typeof (byName as any).name === 'string') {
+                return (byName as any).name;
+            }
+        } catch (_err) {
+            // Ignore lookup errors and fallback to raw token.
+        }
+
+        return companyToken;
     }
 
     private toPlainText(value: string): string {
