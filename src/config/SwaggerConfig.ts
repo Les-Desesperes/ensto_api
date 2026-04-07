@@ -4,6 +4,30 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc, { Options } from 'swagger-jsdoc';
 
 export class SwaggerConfig {
+    private getServers() {
+        const configuredServers = process.env.SWAGGER_SERVERS
+            ?.split(',')
+            .map((server) => server.trim())
+            .filter(Boolean)
+            .map((url) => ({
+                url,
+                description: url.includes('localhost') ? 'Local server' : 'Configured server',
+            }));
+
+        if (configuredServers && configuredServers.length > 0) {
+            return configuredServers;
+        }
+
+        const fallbackUrl = process.env.API_BASE_URL || 'http://localhost:3000';
+
+        return [
+            {
+                url: fallbackUrl,
+                description: fallbackUrl.includes('localhost') ? 'Local server' : 'Configured server',
+            },
+        ];
+    }
+
     private readonly options: Options = {
         definition: {
             openapi: '3.0.3',
@@ -12,12 +36,7 @@ export class SwaggerConfig {
                 version: '1.0.0',
                 description: 'Express + TypeScript OOP API documentation',
             },
-            servers: [
-                {
-                    url: 'http://localhost:3000',
-                    description: 'Local server',
-                },
-            ],
+            servers: this.getServers(),
             components: {
                 securitySchemes: {
                     BearerAuth: {
