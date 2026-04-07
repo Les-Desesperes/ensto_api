@@ -16,6 +16,14 @@ import logger from '@/shared/logger';
 class Server {
     private port: number = Number(process.env.PORT) || 3000;
 
+    private parseBoolean(value: string | undefined): boolean {
+        if (!value) {
+            return false;
+        }
+
+        return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase());
+    }
+
     /**
      * Start the server
      * Initializes the database, creates the HTTP server, and starts listening
@@ -75,7 +83,16 @@ class Server {
 
             // Initialize models
             db.initDefaultModels();
-            await db.sync({ alter: true });
+            const enableAlterSync = this.parseBoolean(process.env.DB_SYNC_ALTER);
+
+            if (enableAlterSync && process.env.NODE_ENV === 'production') {
+                logger.warn('DB_SYNC_ALTER=true ignored in production for safety.');
+            }
+
+            const useAlterSync = enableAlterSync && process.env.NODE_ENV !== 'production';
+            await db.sync(useAlterSync ? { alter: true } : undefined);
+
+            logger.info({ alter: useAlterSync }, 'Database sync completed');
 
             logger.info('✅ All database tables synchronized.');
         } catch (error) {

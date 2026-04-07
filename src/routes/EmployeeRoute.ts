@@ -2,6 +2,7 @@ import {Router} from 'express';
 import {IRoute} from '@/shared/interfaces';
 import {EmployeeController} from '@/controllers';
 import {EmployeeService} from '@/services/EmployeeService';
+import { roleMiddleware } from '@/shared/middleware';
 
 /**
  * @openapi
@@ -168,7 +169,7 @@ export class EmployeeRoute implements IRoute {
         this.router.get('/rfid/:id', handlers.getByRFID)
 
         // POST /api/v1/employee/ - Create a new employee
-        this.router.post('/', handlers.createEmployee);
+        this.router.post('/', roleMiddleware('Admin'), handlers.createEmployee);
     }
 
     getRouter(): Router {

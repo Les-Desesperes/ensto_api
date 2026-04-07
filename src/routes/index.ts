@@ -5,6 +5,7 @@ import { EmployeeRoute } from './EmployeeRoute';
 import { VisitorRoute } from './VisitorRoute';
 import { HistoryLogRoute } from './HistoryLogRoute';
 import {CompanyRoute} from "@/routes/CompanyRoute";
+import { AuthRoute } from './AuthRoute';
 
 /**
  * @openapi
@@ -39,6 +40,7 @@ const employeeRoute = new EmployeeRoute();
 const visitorRoute = new VisitorRoute();
 const historyLogRoute = new HistoryLogRoute();
 const companyRoute = new CompanyRoute();
+const authRoute = new AuthRoute();
 
 // Welcome route
 router.get('/', (req, res) => {
@@ -53,5 +55,6 @@ router.use('/employees', employeeRoute.getRouter());
 router.use('/visitor', visitorRoute.getRouter());
 router.use('/history-log', historyLogRoute.getRouter());
 router.use('/company', companyRoute.getRouter());
+router.use('/auth', authRoute.getRouter());
 
 export default router;

@@ -2,8 +2,9 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 import apiRoutes from '@/routes';
-import { errorHandler } from '@/shared/middleware';
+import { authMiddleware, errorHandler } from '@/shared/middleware';
 import { requestLogger } from '@/shared/logger';
 import { SwaggerConfig } from '@/config/SwaggerConfig';
 
@@ -47,12 +48,13 @@ export class App {
         // Body parsing middleware
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
+        this.app.use(cookieParser());
 
         // Request logging middleware (pino)
         this.app.use(requestLogger);
 
-        // Optional: Add Bearer token authentication middleware to protected routes
-        // this.app.use('/api/v1', authMiddleware);
+        // Protect API routes with JWT auth (public routes are bypassed inside middleware)
+        this.app.use('/api/v1', authMiddleware);
     }
 
     /**

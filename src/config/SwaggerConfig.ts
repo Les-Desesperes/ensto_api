@@ -37,6 +37,7 @@ export class SwaggerConfig {
                 description: 'Express + TypeScript OOP API documentation',
             },
             servers: this.getServers(),
+            security: [{ BearerAuth: [] }],
             components: {
                 securitySchemes: {
                     BearerAuth: {
@@ -74,9 +75,38 @@ export class SwaggerConfig {
                         },
                         required: ['licensePlate'],
                     },
+                    LoginRequest: {
+                        type: 'object',
+                        properties: {
+                            username: { type: 'string', example: 'admin01' },
+                            password: { type: 'string', example: 'StrongPassword123!' },
+                        },
+                        required: ['username', 'password'],
+                    },
+                    AuthUser: {
+                        type: 'object',
+                        properties: {
+                            employeeId: { oneOf: [{ type: 'string' }, { type: 'number' }] },
+                            username: { type: 'string' },
+                            role: { type: 'string', enum: ['Admin', 'Magasinier', 'Personnel'] },
+                            badgeUuid: { type: 'string' },
+                        },
+                        required: ['employeeId', 'username', 'role', 'badgeUuid'],
+                    },
+                    LoginData: {
+                        type: 'object',
+                        properties: {
+                            token: { type: 'string' },
+                            tokenType: { type: 'string', example: 'Bearer' },
+                            expiresInMs: { type: 'number', example: 28800000 },
+                            user: { $ref: '#/components/schemas/AuthUser' },
+                        },
+                        required: ['token', 'tokenType', 'expiresInMs', 'user'],
+                    },
                 },
             },
             tags: [
+                { name: 'Auth', description: 'Authentication endpoints' },
                 { name: 'System', description: 'System endpoints' },
                 { name: 'Driver', description: 'Delivery driver endpoints' },
                 { name: 'Vehicle', description: 'Vehicle endpoints' },
