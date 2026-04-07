@@ -1,4 +1,4 @@
-import { DeliveryDriver } from '@les-desesperes/ensto-db';
+import { Company, DeliveryDriver } from '@les-desesperes/ensto-db';
 import { IService } from '@/shared/interfaces';
 import { broadcastNotification } from '@/websockets';
 import logger from '@/shared/logger';
@@ -21,7 +21,22 @@ export class DeliveryDriverService implements IService {
     async getAllDrivers(): Promise<any[]> {
         try {
             const drivers = await DeliveryDriver.findAll();
-            return drivers;
+            const companyCache = new Map<string, string>();
+
+            return Promise.all(
+                drivers.map(async (driver: any) => {
+                    const raw = typeof driver.toJSON === 'function' ? driver.toJSON() : driver;
+                    const companyToken = raw?.company == null ? '' : String(raw.company).trim();
+
+                    const companyName = await this.resolveCompanyName(companyToken, companyCache);
+
+                    return {
+                        ...raw,
+                        companyId: companyToken || null,
+                        company: companyName,
+                    };
+                })
+            );
         } catch (error) {
             logger.error({ err: error }, 'Error fetching drivers from database');
             throw {
@@ -107,6 +122,42 @@ export class DeliveryDriverService implements IService {
                 message: 'Failed to fetch driver',
             };
         }
+    }
+
+    private async resolveCompanyName(companyToken: string, cache: Map<string, string>): Promise<string> {
+        if (!companyToken) {
+            return '';
+        }
+
+        const cached = cache.get(companyToken);
+        if (cached != null) {
+            return cached;
+        }
+
+        try {
+            const byPk = await Company.findByPk(companyToken as any);
+            const byPkName = (byPk as any)?.name;
+            if (typeof byPkName === 'string' && byPkName.trim()) {
+                cache.set(companyToken, byPkName);
+                return byPkName;
+            }
+        } catch (_err) {
+            // Ignore and fallback to other lookup strategy.
+        }
+
+        try {
+            const byName = await Company.findOne({ where: { name: companyToken } });
+            const byNameValue = (byName as any)?.name;
+            if (typeof byNameValue === 'string' && byNameValue.trim()) {
+                cache.set(companyToken, byNameValue);
+                return byNameValue;
+            }
+        } catch (_err) {
+            // Ignore and fallback to raw token.
+        }
+
+        cache.set(companyToken, companyToken);
+        return companyToken;
     }
 }
 
