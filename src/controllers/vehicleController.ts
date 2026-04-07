@@ -55,8 +55,12 @@ export class VehicleController implements IController {
 
     private async storeTempPlate(req: Request, res: Response): Promise<void> {
         const licensePlate = req.body?.licensePlate as string;
-        const tempPlate = await this.vehicleService.storeTempPlate(licensePlate);
-        successResponse(res, 200, tempPlate, 'Temporary plate stored successfully');
+        const result = await this.vehicleService.storeTempPlate(licensePlate);
+        const message = result.status === 'existing'
+            ? 'Existing vehicle found and driver data returned'
+            : 'Temporary plate stored successfully';
+
+        successResponse(res, 200, result, message);
     }
 
     private async getTempPlate(req: Request, res: Response): Promise<void> {

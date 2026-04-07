@@ -1,5 +1,23 @@
-import {Vehicle, DeliveryDriver, TempPlate} from '@les-desesperes/ensto-db';
+import {Vehicle, DeliveryDriver, TempPlate, Company} from '@les-desesperes/ensto-db';
 import { IService } from '@/shared/interfaces';
+import logger from '@/shared/logger';
+import { ExternalDriverPayload, IntegrationService } from './IntegrationService';
+import { decryptAES } from '@/utils/crypto';
+
+export interface ExistingVehicleTempPlateResult {
+    status: 'existing';
+    licensePlate: string;
+    firstName: string;
+    lastName: string;
+    companyName: string;
+}
+
+export interface NewVehicleTempPlateResult {
+    status: 'new';
+    licensePlate: string;
+}
+
+export type StoreTempPlateResult = ExistingVehicleTempPlateResult | NewVehicleTempPlateResult;
 
 /**
  * VehicleService
@@ -11,7 +29,12 @@ import { IService } from '@/shared/interfaces';
  * - Dependency Inversion: Depends on abstractions (IService), not concrete implementations
  */
 export class VehicleService implements IService {
-    
+    private readonly integrationService: IntegrationService;
+
+    constructor(integrationService?: IntegrationService) {
+        this.integrationService = integrationService ?? new IntegrationService();
+    }
+
     /**
      * Retrieves a vehicle by its license plate.
      * Includes associated driver information.
@@ -39,7 +62,7 @@ export class VehicleService implements IService {
 
             return vehicle;
         } catch (error: any) {
-            console.error('Error fetching vehicle by plate:', error);
+            logger.error({ err: error, licensePlate }, 'Error fetching vehicle by plate');
 
             // Re-throw custom errors with statusCode
             if (error.statusCode) {
@@ -70,7 +93,7 @@ export class VehicleService implements IService {
 
             return vehicles;
         } catch (error) {
-            console.error('Error fetching all vehicles:', error);
+            logger.error({ err: error }, 'Error fetching all vehicles');
             throw {
                 statusCode: 500,
                 message: 'Failed to fetch vehicles',
@@ -78,7 +101,7 @@ export class VehicleService implements IService {
         }
     }
 
-    async storeTempPlate(licensePlate: string): Promise<{ licensePlate: string }> {
+    async storeTempPlate(licensePlate: string): Promise<StoreTempPlateResult> {
         if (!licensePlate || !licensePlate.trim()) {
             throw {
                 statusCode: 400,
@@ -89,14 +112,52 @@ export class VehicleService implements IService {
         const normalizedPlate = licensePlate.trim().toUpperCase();
 
         try {
+            const existingVehicle = await Vehicle.findOne({
+                where: { licensePlate: normalizedPlate },
+                include: [
+                    {
+                        model: DeliveryDriver,
+                        attributes: ['driverId', 'encryptedFirstName', 'encryptedLastName', 'company'],
+                        include: [
+                            {
+                                model: Company,
+                                attributes: ['name'],
+                                required: false,
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            if (existingVehicle) {
+                const existingPayload = this.extractExistingVehiclePayload(existingVehicle, normalizedPlate);
+
+                if (existingPayload) {
+                    await this.integrationService.dispatchToExternalDisplay({
+                        vehicle: existingPayload,
+                    });
+
+                    return {
+                        status: 'existing',
+                        licensePlate: existingPayload.licensePlate,
+                        firstName: existingPayload.firstName ?? '',
+                        lastName: existingPayload.lastName ?? '',
+                        companyName: existingPayload.companyName ?? '',
+                    };
+                }
+            }
+
             await TempPlate.upsert({
                 singletonId: 1,
                 licensePlate: normalizedPlate,
             });
 
-            return { licensePlate: normalizedPlate };
+            return {
+                status: 'new',
+                licensePlate: normalizedPlate,
+            };
         } catch (error) {
-            console.error('Error storing temp plate:', error);
+            logger.error({ err: error, licensePlate: normalizedPlate }, 'Error storing temp plate');
             throw {
                 statusCode: 500,
                 message: 'Failed to store temporary license plate',
@@ -113,11 +174,74 @@ export class VehicleService implements IService {
 
             return { licensePlate: record.licensePlate };
         } catch (error) {
-            console.error('Error fetching temp plate:', error);
+            logger.error({ err: error }, 'Error fetching temp plate');
             throw {
                 statusCode: 500,
                 message: 'Failed to fetch temporary license plate',
             };
+        }
+    }
+
+    private extractExistingVehiclePayload(vehicle: any, licensePlate: string): ExternalDriverPayload | null {
+        const candidate = this.extractDriverCandidate(vehicle);
+
+        if (!candidate) {
+            return null;
+        }
+
+        const firstName = this.toPlainText(candidate.encryptedFirstName ?? candidate.firstName ?? '');
+        const lastName = this.toPlainText(candidate.encryptedLastName ?? candidate.lastName ?? '');
+        const companyName = this.extractCompanyName(candidate);
+
+        return {
+            status: 'existing',
+            licensePlate,
+            firstName,
+            lastName,
+            companyName,
+        };
+    }
+
+    private extractDriverCandidate(vehicle: any): any | null {
+        const raw =
+            vehicle?.DeliveryDriver ??
+            vehicle?.deliveryDriver ??
+            vehicle?.driver ??
+            vehicle?.DeliveryDrivers ??
+            vehicle?.deliveryDrivers ??
+            null;
+
+        if (Array.isArray(raw)) {
+            return raw[0] ?? null;
+        }
+
+        return raw;
+    }
+
+    private extractCompanyName(driver: any): string {
+        const nestedCompany = driver?.Company ?? driver?.companyDetails ?? driver?.companyModel ?? null;
+
+        if (nestedCompany?.name) {
+            return String(nestedCompany.name);
+        }
+
+        if (typeof driver?.company === 'string') {
+            return driver.company;
+        }
+
+        return '';
+    }
+
+    private toPlainText(value: string): string {
+        if (!value || typeof value !== 'string') {
+            return '';
+        }
+
+        try {
+            return decryptAES(value);
+        } catch (err) {
+            logger.warn({ err }, 'Unable to decrypt driver field, returning raw value');
+            return value;
         }
     }
 }
