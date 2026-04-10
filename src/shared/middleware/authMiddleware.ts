@@ -4,7 +4,7 @@ import { verifyAccessToken } from '@/utils/jwt';
 
 const PUBLIC_API_PATHS = new Set(['/auth/login']);
 
-const PUBLIC_API_PREFIXES = ['/employee/rfid/'];
+const PUBLIC_API_PREFIXES = ['/employee/rfid/', '/portail/'];
 
 const isPublicPath = (path: string): boolean => {
     if (PUBLIC_API_PATHS.has(path)) {
