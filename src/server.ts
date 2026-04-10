@@ -41,21 +41,21 @@ class Server {
 
             // 4. Start listening
             server.listen(this.port, () => {
-                logger.info({ env: process.env.NODE_ENV || 'development', port: this.port }, '🚀 Server is running');
-                logger.info({ url: `http://localhost:${this.port}` }, '📍 Server URL');
-                logger.info('💬 WebSocket is ready for connections');
+                logger.info({ env: process.env.NODE_ENV || 'development', port: this.port }, 'Server started');
+                logger.info({ url: `http://localhost:${this.port}` }, 'Server URL');
+                logger.info('WebSocket server is ready');
             });
 
             // Graceful shutdown
             process.on('SIGINT', async () => {
-                logger.info('\n⏹️  Shutting down gracefully...');
+                logger.info('Graceful shutdown started');
                 server.close(() => {
-                    logger.info('✅ Server shut down');
+                    logger.info('Server stopped');
                     process.exit(0);
                 });
             });
         } catch (error) {
-            logger.error({ err: error }, '❌ Failed to start the server:');
+            logger.error({ err: error }, 'Failed to start server');
             process.exit(1);
         }
     }
@@ -79,7 +79,7 @@ class Server {
         try {
             // Authenticate database connection
             await db.authenticate();
-            logger.info('✅ Connected to MySQL database.');
+            logger.info('Connected to MySQL database');
 
             // Initialize models
             db.initDefaultModels();
@@ -93,11 +93,10 @@ class Server {
             await db.sync(useAlterSync ? { alter: true } : undefined);
 
             logger.info({ alter: useAlterSync }, 'Database sync completed');
-
-            logger.info('✅ All database tables synchronized.');
+            logger.info('Database tables synchronized');
         } catch (error) {
             await db.close();
-            logger.error({ err: error }, '❌ Failed to connect to database:');
+            logger.error({ err: error }, 'Failed to initialize database');
             throw error;
         }
     }

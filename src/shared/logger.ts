@@ -6,6 +6,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 const baseOptions: pino.LoggerOptions = {
   level: process.env.LOG_LEVEL || (isProduction ? 'info' : 'debug'),
   base: { pid: false },
+  timestamp: pino.stdTimeFunctions.isoTime,
 };
 
 const logger = isProduction
@@ -31,14 +32,28 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
   // log on response finish to capture status code and duration
   res.on('finish', () => {
     const duration = Date.now() - start;
-    logger.info({
+    const logPayload = {
       method: req.method,
       url: req.originalUrl || req.url,
       params: req.params,
       query: req.query,
       statusCode: res.statusCode,
       durationMs: duration,
-    }, 'HTTP request');
+      ip: req.ip,
+      userAgent: req.headers['user-agent'],
+    };
+
+    if (res.statusCode >= 500) {
+      logger.error(logPayload, 'HTTP request failed');
+      return;
+    }
+
+    if (res.statusCode >= 400) {
+      logger.warn(logPayload, 'HTTP request completed with client error');
+      return;
+    }
+
+    logger.info(logPayload, 'HTTP request completed');
   });
 
   next();

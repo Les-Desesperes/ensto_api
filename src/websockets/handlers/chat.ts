@@ -1,8 +1,9 @@
 import { WsHandler } from '@/types';
 import { WebSocket } from 'ws';
+import logger from '@/shared/logger';
 
 export const handleChat: WsHandler = (ws, payload, clients) => {
-    console.log('Chat message received:', payload);
+    logger.debug({ payload }, 'WebSocket chat message received');
 
     // Broadcast the chat message to all OTHER connected clients
     clients.forEach((client) => {

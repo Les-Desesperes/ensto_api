@@ -1,5 +1,6 @@
 import { HistoryLog } from '@les-desesperes/ensto-db';
 import { IService } from '@/shared/interfaces';
+import logger from '@/shared/logger';
 
 export type ActionType = 'Entry' | 'Exit' | 'Refusal';
 
@@ -14,7 +15,7 @@ export class HistoryLogService implements IService {
         try {
             return await HistoryLog.findAll();
         } catch (error) {
-            console.error('Error fetching history logs from database:', error);
+            logger.error({ err: error }, 'Failed to fetch history logs from database');
             throw {
                 statusCode: 500,
                 message: 'Failed to fetch history logs',
@@ -56,7 +57,7 @@ export class HistoryLogService implements IService {
                 dateTime: parsedDateTime ?? new Date(),
             });
         } catch (error) {
-            console.error('Error creating history log in database:', error);
+            logger.error({ err: error, actionType }, 'Failed to create history log in database');
             throw {
                 statusCode: 500,
                 message: 'Failed to create history log',

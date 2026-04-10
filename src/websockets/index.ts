@@ -1,6 +1,7 @@
 import { Server as HttpServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { routeMessage } from './router';
+import logger from '@/shared/logger';
 
 let wss: WebSocketServer;
 
@@ -8,7 +9,7 @@ export const initializeWebSocket = (server: HttpServer) => {
     wss = new WebSocketServer({ server });
 
     wss.on('connection', (ws: WebSocket) => {
-        console.log('✅ New WebSocket client connected');
+        logger.info('WebSocket client connected');
 
         // Welcome message
         ws.send(JSON.stringify({
@@ -24,21 +25,21 @@ export const initializeWebSocket = (server: HttpServer) => {
         });
 
         ws.on('close', () => {
-            console.log('❌ WebSocket client disconnected');
+            logger.info('WebSocket client disconnected');
         });
 
         ws.on('error', (error) => {
-            console.error('⚠️ WebSocket Error:', error);
+            logger.error({ err: error }, 'WebSocket client error');
         });
     });
 
-    console.log('🔌 WebSocket server initialized');
+    logger.info('WebSocket server initialized');
 };
 
 // Exported for use inside standard Express controllers (e.g., driverController.ts)
 export const broadcastNotification = (data: any) => {
     if (!wss) {
-        console.warn('WebSocket server is not initialized yet.');
+        logger.warn('WebSocket server is not initialized');
         return;
     }
 

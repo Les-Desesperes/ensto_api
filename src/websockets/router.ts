@@ -2,6 +2,7 @@ import { WebSocket, WebSocketServer } from 'ws';
 import { WsMessage } from '@/types';
 import { handlePing } from './handlers/system';
 import { handleChat } from './handlers/chat';
+import logger from '@/shared/logger';
 
 export const routeMessage = (ws: WebSocket, messageStr: string, wss: WebSocketServer) => {
     try {
@@ -22,12 +23,12 @@ export const routeMessage = (ws: WebSocket, messageStr: string, wss: WebSocketSe
             //   break;
 
             default:
-                console.warn(`⚠️ Unhandled WebSocket event type: ${parsedData.type}`);
+                logger.warn({ eventType: parsedData.type }, 'Unhandled WebSocket event type');
                 ws.send(JSON.stringify({ type: 'ERROR', message: `Unknown event type: ${parsedData.type}` }));
                 break;
         }
     } catch (error) {
-        console.error('Failed to parse WebSocket message:', messageStr);
+        logger.error({ err: error, messageStr }, 'Failed to parse WebSocket message');
         ws.send(JSON.stringify({ type: 'ERROR', message: 'Invalid JSON format. Expected { "type": "...", "payload": {...} }' }));
     }
 };
