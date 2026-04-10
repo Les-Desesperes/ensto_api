@@ -75,8 +75,6 @@ import { roleMiddleware } from '@/shared/middleware';
  *   get:
  *     tags: [Employee]
  *     summary: Get employee by RFID
- *     security:
- *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -133,8 +131,6 @@ import { roleMiddleware } from '@/shared/middleware';
  *   get:
  *     tags: [Employee]
  *     summary: Get employee by RFID (alias)
- *     security:
- *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
