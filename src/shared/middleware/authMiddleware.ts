@@ -4,6 +4,16 @@ import { verifyAccessToken } from '@/utils/jwt';
 
 const PUBLIC_API_PATHS = new Set(['/auth/login']);
 
+const PUBLIC_API_PREFIXES = ['/employee/rfid/'];
+
+const isPublicPath = (path: string): boolean => {
+    if (PUBLIC_API_PATHS.has(path)) {
+        return true;
+    }
+
+    return PUBLIC_API_PREFIXES.some((prefix) => path.startsWith(prefix));
+};
+
 /**
  * Bearer token authentication middleware.
  * Validates that the request contains a valid Bearer token in the Authorization header.
@@ -14,7 +24,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
         return;
     }
 
-    if (PUBLIC_API_PATHS.has(req.path)) {
+    if (isPublicPath(req.path)) {
         next();
         return;
     }
