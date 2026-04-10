@@ -4,14 +4,14 @@ import { verifyAccessToken } from '@/utils/jwt';
 
 const PUBLIC_API_PATHS = new Set(['/auth/login']);
 
-const PUBLIC_API_PREFIXES = ['/employee/rfid/', '/portail/', '/visitor/'];
+const PUBLIC_API_BASE_PATHS = ['/employee/rfid', '/portail', '/visitor'];
 
 const isPublicPath = (path: string): boolean => {
     if (PUBLIC_API_PATHS.has(path)) {
         return true;
     }
 
-    return PUBLIC_API_PREFIXES.some((prefix) => path.startsWith(prefix));
+    return PUBLIC_API_BASE_PATHS.some((basePath) => path === basePath || path.startsWith(`${basePath}/`));
 };
 
 /**
@@ -48,4 +48,3 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
         return;
     }
 };
-
