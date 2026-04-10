@@ -122,16 +122,19 @@ export class SwaggerConfig {
     private readonly spec = swaggerJSDoc(this.options);
 
     public initialize(app: Application): void {
+        const swaggerUiOptions = {
+            explorer: true,
+            swaggerOptions: {
+                persistAuthorization: true,
+                url: '/docs.json',
+            },
+        };
+
         app.use(
             '/docs',
-            helmet({ contentSecurityPolicy: false }),
-            swaggerUi.serve,
-            swaggerUi.setup(this.spec, {
-                explorer: true,
-                swaggerOptions: {
-                    persistAuthorization: true,
-                },
-            })
+            helmet({ contentSecurityPolicy: false, hsts: false }),
+            swaggerUi.serveFiles(this.spec, swaggerUiOptions),
+            swaggerUi.setup(this.spec, swaggerUiOptions)
         );
 
         app.get('/docs.json', (_req, res) => {

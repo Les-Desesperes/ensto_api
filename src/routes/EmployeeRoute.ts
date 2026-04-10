@@ -141,6 +141,77 @@ import { roleMiddleware } from '@/shared/middleware';
  *         required: true
  *         schema:
  *           type: string
+ *
+ * /api/v1/employees/{id}:
+ *   get:
+ *     tags: [Employee]
+ *     summary: Get employee by id for edit page
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Employee primary key
+ *     responses:
+ *       200:
+ *         description: Employee fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       404:
+ *         description: Employee not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *   patch:
+ *     tags: [Employee]
+ *     summary: Update employee by id
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               badgeUuid:
+ *                 type: string
+ *               passwordHash:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [Admin, Magasinier, Personnel]
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Employee updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Employee not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 
 /**
@@ -167,6 +238,12 @@ export class EmployeeRoute implements IRoute {
 
         // GET /api/v1/employee/rfid/:id - Fetch one employee by RFID
         this.router.get('/rfid/:id', handlers.getByRFID)
+
+        // GET /api/v1/employees/:id - Fetch one employee for edit page
+        this.router.get('/:id', roleMiddleware('Admin'), handlers.getById);
+
+        // PATCH /api/v1/employees/:id - Update an employee
+        this.router.patch('/:id', roleMiddleware('Admin'), handlers.patchEmployee);
 
         // POST /api/v1/employee/ - Create a new employee
         this.router.post('/', roleMiddleware('Admin'), handlers.createEmployee);

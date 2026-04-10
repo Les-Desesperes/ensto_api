@@ -39,8 +39,15 @@ export class App {
      * This includes security (helmet), CORS, body parsing, etc.
      */
     private setupMiddlewares(): void {
-        // Security middleware
-        this.app.use(helmet());
+
+        // Security middleware. Keep HSTS/CSP for production only to avoid breaking local/demo hosts without TLS.
+        const isProduction = process.env.NODE_ENV === 'production';
+        this.app.use(
+            helmet({
+                contentSecurityPolicy: isProduction,
+                hsts: isProduction,
+            })
+        );
 
         // CORS middleware
         this.app.use(cors());
